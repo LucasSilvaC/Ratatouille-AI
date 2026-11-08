@@ -1,7 +1,9 @@
-node_modules
-.next
+**/node_modules
+**/.next
 .git
-.env*
-coverage
-playwright-report
-test-results
+**/.env*
+**/coverage
+**/playwright-report
+**/test-results
+**/.venv
+**/__pycache__
