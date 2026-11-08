@@ -25,11 +25,13 @@ Open `http://localhost:3000`; the health endpoint is `http://localhost:3000/api/
 
 `DATABASE_URL` is server-only. Use `pnpm db:generate` to create versioned migrations and `pnpm db:migrate` to apply them. `pnpm db:push` is only for disposable local development; production uses migrations. `pnpm db:studio` opens Drizzle Studio and `pnpm db:seed` adds the removable example record.
 
-Docker commands: `docker compose up -d`, `docker compose down`, and `docker compose down -v` (the last removes local database data). Build the app image with `docker build -t acrux-project-template .`.
+Docker commands: `docker compose up -d --build`, `docker compose down`, and `docker compose down -v` (the last removes local database data). Compose applies database migrations before starting the app. Build the production app image with `docker build --target runner -t acrux-project-template .`.
 
 ## Quality
 
 `pnpm format`, `pnpm format:check`, `pnpm lint`, `pnpm typecheck`, `pnpm test:unit`, `pnpm test:coverage`, `pnpm build`, `pnpm test:e2e`, and `pnpm check` are available. CI runs format, lint, types, unit tests, build, and Chromium E2E.
+
+See [deployment and CI/CD](docs/deployment.md) for the GitHub checks, Vercel setup, container deployment, and migration steps.
 
 Commits use `type(scope): description`, lowercase, with a mandatory scope. Run `pnpm check` before every PR. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
@@ -45,4 +47,4 @@ Remove `src/features/example`, `src/server/domain/{entities,errors,repositories,
 
 ## Production
 
-Set `DATABASE_URL` and `NEXT_PUBLIC_APP_URL` in Vercel or another platform. Supabase PostgreSQL works through its PostgreSQL connection string; do not install the Supabase SDK unless a product needs it. Confirm migrations, environment variables, security headers, and an integration-specific CSP before deployment.
+Set `DATABASE_URL` and `NEXT_PUBLIC_APP_URL` in Vercel or another platform. Supabase PostgreSQL works through its PostgreSQL connection string; do not install the Supabase SDK unless a product needs it. Confirm migrations, environment variables, security headers, and an integration-specific CSP before deployment. The Docker Compose deployment applies migrations before starting the app.
