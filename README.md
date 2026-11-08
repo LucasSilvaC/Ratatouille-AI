@@ -1,50 +1,73 @@
-# Acrux Project Template
+# RatatouilleAI
 
-A private, reusable fullstack baseline for Acrux web products. Create the official repository inside the Acrux GitHub organization; this template intentionally has no remote URL.
+Monorepo com o web-app Next.js existente e estrutura documentada para agentes LLM,
+recomendação alimentar e rede neural em Python.
 
-## Stack
+## Estrutura
 
-Next.js App Router, React, TypeScript, Tailwind CSS, Shadcn-style primitives, Server Actions, Drizzle, PostgreSQL, Zod, Vitest, Playwright, Docker, pnpm, and GitHub Actions.
+| Pasta                     | Responsabilidade                              | Estado               |
+| ------------------------- | --------------------------------------------- | -------------------- |
+| `apps/web`                | Interface e backend Next.js, Drizzle e testes | Implementado         |
+| `apps/ai-api`             | API Python/FastAPI                            | Somente documentação |
+| `apps/ai-worker`          | Execução assíncrona e jobs                    | Somente documentação |
+| `packages/agents`         | NutriGuard, Chef Regional e integração LLM    | Somente documentação |
+| `packages/recommendation` | Políticas, busca, ranking e validação         | Somente documentação |
+| `packages/neural`         | Treinamento e inferência de afinidade         | Somente documentação |
+| `packages/ai-client`      | Cliente TypeScript gerado da API              | Somente documentação |
+| `contracts`               | Contratos OpenAPI e eventos                   | Somente documentação |
 
-## Requirements and setup
+Consulte [a arquitetura](docs/architecture.md) e os README.md de cada pasta.
+As telas e integrações do wireframe ainda não foram implementadas neste repositório.
 
-Node 24 (see `.nvmrc`), pnpm 11, and Docker for local PostgreSQL.
+## Desenvolvimento
 
-```bash
+Requisitos: Node 24, pnpm 11 e Docker para PostgreSQL local. Na raiz:
+
+```powershell
 pnpm install
-cp .env.example .env.local
+Copy-Item .env.example .env
+Copy-Item apps/web/.env.example apps/web/.env.local
 docker compose up -d postgres
-pnpm db:generate
+$env:DATABASE_URL = "postgres://acrux:acrux@localhost:5432/acrux_template"
 pnpm db:migrate
 pnpm dev
 ```
 
-Open `http://localhost:3000`; the health endpoint is `http://localhost:3000/api/health`.
+`.env` da raiz configura o Compose. `apps/web/.env.local` configura o Next.js.
+Se alterar as credenciais do banco, mantenha os dois arquivos consistentes.
+Nunca commite segredos. O web-app abre em http://localhost:3000 e tem health check
+em http://localhost:3000/api/health.
 
-## Database
+## Comandos
 
-`DATABASE_URL` is server-only. Use `pnpm db:generate` to create versioned migrations and `pnpm db:migrate` to apply them. `pnpm db:push` is only for disposable local development; production uses migrations. `pnpm db:studio` opens Drizzle Studio and `pnpm db:seed` adds the removable example record.
+Execute pela raiz: `pnpm dev`, `pnpm build`, `pnpm start`, `pnpm lint`,
+`pnpm typecheck`, `pnpm test:unit`, `pnpm test:coverage`, `pnpm test:e2e`,
+`pnpm format` e `pnpm check`. Os comandos do web-app são delegados ao workspace
+`@ratatouille/web`; a formatação verifica o monorepo inteiro.
 
-Docker commands: `docker compose up -d --build`, `docker compose down`, and `docker compose down -v` (the last removes local database data). Compose applies database migrations before starting the app. Build the production app image with `docker build --target runner -t acrux-project-template .`.
+Para E2E, instale o Chromium com
+`pnpm --filter @ratatouille/web exec playwright install chromium`.
 
-## Quality
+Banco: `pnpm db:generate`, `pnpm db:migrate`, `pnpm db:studio` e `pnpm db:seed`.
+O Drizzle CLI e o seed precisam de `DATABASE_URL` no ambiente do processo; os comandos
+Next.js carregam `apps/web/.env.local`. `db:push` é apenas para bancos descartáveis.
+Schemas e migrações ficam em `apps/web/src/server/infrastructure/database/drizzle`
+e `apps/web/drizzle`, respectivamente.
 
-`pnpm format`, `pnpm format:check`, `pnpm lint`, `pnpm typecheck`, `pnpm test:unit`, `pnpm test:coverage`, `pnpm build`, `pnpm test:e2e`, and `pnpm check` are available. CI runs format, lint, types, unit tests, build, and Chromium E2E.
+## Deploy
 
-See [deployment and CI/CD](docs/deployment.md) for the GitHub checks, Vercel setup, container deployment, and migration steps.
+`docker compose up -d --build` aplica migrações e inicia o web-app. A imagem final
+usa o servidor standalone em `apps/web/server.js`. Os serviços Python ainda não
+fazem parte do Compose. Consulte [deploy e CI/CD](docs/deployment.md).
 
-Commits use `type(scope): description`, lowercase, with a mandatory scope. Run `pnpm check` before every PR. See [CONTRIBUTING.md](CONTRIBUTING.md).
+Na Vercel, configure Root Directory como `apps/web` e permita arquivos externos ao
+Root Directory para acessar o workspace. A instalação usa o lockfile da raiz.
 
-## Structure
+## Evolução
 
-`src/app` is the Next framework layer; `src/components` contains atoms, molecules, and organisms; `src/features` owns product UI; `src/server` contains Clean Architecture layers. See [docs/architecture.md](docs/architecture.md).
+Primeiro implementar API e um fluxo de geração/troca com regras e contratos.
+Depois conectar os agentes, jobs demorados e o preditor neural conforme existirem
+dados e avaliações. Cada pasta reservada descreve seu objetivo e seus limites.
 
-To create a feature, add its UI, actions, schemas, and tests under `src/features/<name>`. Add a use case under `server/application/services`, a repository interface under `domain/repositories`, its implementation under `infrastructure`, and connect them in `composition-root.ts`. New Shadcn primitives belong in `src/components/atoms` as configured in `components.json`.
-
-## Removing the example feature
-
-Remove `src/features/example`, `src/server/domain/{entities,errors,repositories,value-objects}/example-*`, `src/server/application/{dtos,services}/create-example-record-*`, `src/server/infrastructure/database/drizzle/{repositories,schemas}/example-*`, `src/server/presentation/{controllers,mappers}/example-*`, the factory in `src/server/composition-root.ts`, its tests, and the example form import from `src/app/page.tsx`. Generate a migration to drop `example_records` when it has reached a deployed database.
-
-## Production
-
-Set `DATABASE_URL` and `NEXT_PUBLIC_APP_URL` in Vercel or another platform. Supabase PostgreSQL works through its PostgreSQL connection string; do not install the Supabase SDK unless a product needs it. Confirm migrations, environment variables, security headers, and an integration-specific CSP before deployment. The Docker Compose deployment applies migrations before starting the app.
+A base existente mantém Atomic Design na interface e Clean Architecture no backend.
+Consulte [CONTRIBUTING.md](CONTRIBUTING.md) para contribuição e commits.
