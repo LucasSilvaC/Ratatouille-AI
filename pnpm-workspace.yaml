@@ -6,3 +6,7 @@ allowBuilds:
   esbuild: true
   sharp: true
   unrs-resolver: true
+
+# Pin the patched Vite peer used by the test toolchain.
+overrides:
+  "vite@8.1.5": 8.1.6
