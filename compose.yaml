@@ -14,17 +14,44 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
-  app:
-    build: .
+      start_period: 5s
+
+  migrate:
+    build:
+      context: .
+      target: migrator
     environment:
-      NODE_ENV: production
-      PORT: 3000
-      DATABASE_URL: ${DATABASE_URL:-postgres://acrux:acrux@postgres:5432/acrux_template}
-      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
-    ports:
-      - "3000:3000"
+      DATABASE_URL: postgresql://${POSTGRES_USER:-acrux}:${POSTGRES_PASSWORD:-acrux}@postgres:5432/${POSTGRES_DB:-acrux_template}
     depends_on:
       postgres:
         condition: service_healthy
+    restart: "no"
+
+  app:
+    build:
+      context: .
+      target: runner
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      HOSTNAME: 0.0.0.0
+      DATABASE_URL: postgresql://${POSTGRES_USER:-acrux}:${POSTGRES_PASSWORD:-acrux}@postgres:5432/${POSTGRES_DB:-acrux_template}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+    ports:
+      - "${APP_PORT:-3000}:3000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:3000/api/health').then((response) => process.exit(response.ok ? 0 : 1)).catch(() => process.exit(1))"
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    restart: unless-stopped
 volumes:
   postgres-data:
