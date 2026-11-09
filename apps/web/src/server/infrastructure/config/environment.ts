@@ -21,6 +21,8 @@ export const environment = {
 export function requireDatabaseUrl(): string {
   const databaseUrl = environment.server.DATABASE_URL;
   if (!databaseUrl)
-    throw new Error("DATABASE_URL is required for database operations. Add it to .env.local.");
+    throw new Error(
+      "DATABASE_URL is required for database operations. Set PostgreSQL values in infra/.env and use root workspace commands.",
+    );
   return databaseUrl;
 }

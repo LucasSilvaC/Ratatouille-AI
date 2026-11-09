@@ -1,10 +1,12 @@
+name: ratatouille-ai
+
 services:
   postgres:
     image: postgres:18-alpine
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-acrux}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-acrux}
-      POSTGRES_DB: ${POSTGRES_DB:-acrux_template}
+      POSTGRES_USER: ${POSTGRES_USER:-ratatouille}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ratatouille}
+      POSTGRES_DB: ${POSTGRES_DB:-ratatouille_ai}
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
@@ -18,10 +20,11 @@ services:
 
   migrate:
     build:
-      context: .
+      context: ..
+      dockerfile: infra/docker/Dockerfile
       target: migrator
     environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER:-acrux}:${POSTGRES_PASSWORD:-acrux}@postgres:5432/${POSTGRES_DB:-acrux_template}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-ratatouille}:${POSTGRES_PASSWORD:-ratatouille}@postgres:5432/${POSTGRES_DB:-ratatouille_ai}
     depends_on:
       postgres:
         condition: service_healthy
@@ -29,13 +32,16 @@ services:
 
   app:
     build:
-      context: .
+      context: ..
+      dockerfile: infra/docker/Dockerfile
       target: runner
+      args:
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
     environment:
       NODE_ENV: production
       PORT: 3000
       HOSTNAME: 0.0.0.0
-      DATABASE_URL: postgresql://${POSTGRES_USER:-acrux}:${POSTGRES_PASSWORD:-acrux}@postgres:5432/${POSTGRES_DB:-acrux_template}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-ratatouille}:${POSTGRES_PASSWORD:-ratatouille}@postgres:5432/${POSTGRES_DB:-ratatouille_ai}
       NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
     ports:
       - "${APP_PORT:-3000}:3000"
@@ -53,5 +59,6 @@ services:
       retries: 5
       start_period: 60s
     restart: unless-stopped
+
 volumes:
   postgres-data:

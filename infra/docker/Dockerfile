@@ -12,6 +12,8 @@ COPY . .
 CMD ["pnpm", "db:migrate"]
 
 FROM dependencies AS builder
+ARG NEXT_PUBLIC_APP_URL=http://localhost:3000
+ENV NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
 COPY . .
 RUN pnpm build
 

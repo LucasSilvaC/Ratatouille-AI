@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
-import { ExampleForm } from "@/features/example/components/example-form";
+import { ExampleForm } from "@/features/example/components/organisms/example-form";
 
 vi.mock("@/features/example/actions/create-example-record.action", () => ({
   createExampleRecordAction: vi.fn(),

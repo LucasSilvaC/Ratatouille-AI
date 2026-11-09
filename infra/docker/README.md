@@ -1,5 +1,9 @@
-# Infraestrutura futura
+# Imagens Docker
 
-Dockerfile e compose.yaml na raiz executam apenas o web-app e PostgreSQL existentes. Esta pasta poderá receber imagens da API, worker e configuração de broker. pgvector, fila e serviços Python ainda não foram adicionados.
+As imagens são definidas em `Dockerfile`, com etapas `migrator`, `builder` e
+`runner`. O contexto de build é a raiz do monorepo; a orquestração e a configuração
+de ambiente ficam em [`infra/`](../README.md).
 
-Status: estrutura planejada; sem implementação nesta etapa.
+Adicione novas imagens e etapas neste diretório e conecte cada serviço em
+`infra/compose.yaml`. Consulte o [guia de infraestrutura](../README.md) antes de
+adicionar outro ponto de inicialização.

@@ -1,4 +1,4 @@
-# Plan: Acrux project template
+# Plan: RatatouilleAI initial foundation
 
 1. Scaffold the official Next.js baseline with pnpm and initialize local Git on `main`.
 2. Configure strict TypeScript, linting, formatting, commits, testing, Docker, CI, and dependency updates.

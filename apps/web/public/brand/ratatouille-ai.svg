@@ -1,0 +1,40 @@
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 128 128"
+  fill="none"
+  role="img"
+  aria-labelledby="title desc"
+>
+  <title id="title">RatatouilleAI</title>
+  <desc id="desc">
+    Silhueta de Remy, um ratinho de focinho pontudo e orelha redonda, usando uma touca de chef.
+  </desc>
+  <g fill="#2D6A4F">
+    <path
+      d="M55 104c-12 8-29 9-37 2-7-6-6-15 0-20 5-4 11-3 14 1 2 3 1 6-1 7-2-4-6-4-8-2-3 3-2 6 1 8 6 4 18 2 27-4l4 8Z"
+    />
+    <path
+      d="M46 105c-3-8-2-20 4-29 4-7 7-14 11-20l23 1c5 8 5 17 0 24 8 5 12 13 11 24l-3 6H44l2-6Z"
+    />
+    <path d="M76 43c10-1 15 3 21 11l19 10c4 2 4 6 0 8l-20 7c-8 3-17 1-22-3L59 65l17-22Z" />
+    <circle cx="56" cy="55" r="20" />
+    <path d="M77 79c7-1 14-1 22 2 3 1 4 4 2 6-2 2-4 1-7 0l-17-1v-7Z" />
+    <path d="M54 105h39c8 0 13 3 13 7H42c0-4 5-7 12-7Z" />
+  </g>
+  <path d="M51 58a9 9 0 0 1 10-11" stroke="#FAF8F5" stroke-width="4" stroke-linecap="round" />
+  <path
+    d="M59 38c-8-3-9-14-2-19 4-3 9-3 13-1 1-8 7-12 14-11 6 1 10 5 11 10 8-2 15 3 15 10 0 6-4 10-11 12l-2 11-36-4-2-8Z"
+    fill="#FAF8F5"
+    stroke="#2D6A4F"
+    stroke-width="5"
+    stroke-linejoin="round"
+  />
+  <path
+    d="m62 38 35 4m-21-9-1 6m13-7-1 8"
+    stroke="#2D6A4F"
+    stroke-width="4"
+    stroke-linecap="round"
+  />
+  <circle cx="94" cy="59" r="2.5" fill="#FAF8F5" />
+  <path d="m103 72 17 6m-19-1 13 9" stroke="#2D6A4F" stroke-width="2.5" stroke-linecap="round" />
+</svg>
