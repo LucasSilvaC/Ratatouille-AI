@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 
-import { ThemeProvider } from "@/components/organisms/theme-provider";
+import { PlannerProvider } from "@/features/planner/providers/planner-provider";
 
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Acrux Project Template",
-  description: "A reusable fullstack baseline for Acrux web applications.",
+  title: "RatatouilleAI — Sua semana, do seu jeito",
+  description: "Planejamento alimentar regional. Demonstração local com dados fictícios.",
 };
 
 interface IRootLayoutProps {
@@ -15,9 +15,9 @@ interface IRootLayoutProps {
 
 export default function RootLayout({ children }: IRootLayoutProps): React.ReactElement {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="pt-BR">
       <body>
-        <ThemeProvider>{children}</ThemeProvider>
+        <PlannerProvider>{children}</PlannerProvider>
       </body>
     </html>
   );
