@@ -17,9 +17,18 @@ packages/
   neural/       Features, treinamento, inferência e avaliação
   ai-client/    Futuro cliente TypeScript gerado
 contracts/      Futuro OpenAPI exportado e contratos de eventos
-infra/docker/   Infraestrutura futura de IA
-scripts/        Automação futura
+infra/          Inicialização, Compose, Dockerfiles, ambiente local e bootstrap
+scripts/        Futura automação de manutenção e geração, sem setup de serviços
 ```
+
+## Evolução incremental
+
+A arquitetura deve permanecer altamente extensível e evoluir por incrementos pequenos
+e componíveis. Toda inicialização de serviços, configuração de ambiente, imagem,
+orquestração e bootstrap deve ser definida ou coordenada em `infra/`. Novos serviços
+devem se integrar ao Compose central quando estiverem implementados, preservando os
+serviços existentes e evitando cópias de configuração em `apps/`. Consulte o
+[guia de infraestrutura](../infra/README.md) antes de incluir um novo passo de setup.
 
 ## Comunicação e dependências
 
