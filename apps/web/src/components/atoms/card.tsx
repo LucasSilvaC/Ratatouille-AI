@@ -6,7 +6,7 @@ type ICardProps = React.HTMLAttributes<HTMLDivElement>;
 export function Card({ className, ...properties }: ICardProps): React.ReactElement {
   return (
     <div
-      className={cn("bg-card text-card-foreground rounded-xl border shadow-sm", className)}
+      className={cn("bg-card text-card-foreground rounded-2xl border shadow-sm", className)}
       {...properties}
     />
   );
