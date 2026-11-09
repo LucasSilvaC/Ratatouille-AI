@@ -6,5 +6,7 @@ local, sem necessidade de banco ou variáveis de ambiente. A galeria fica em
 `/componentes`.
 
 Veja [arquitetura frontend e cenários mockados](../../docs/frontend-demo.md).
-Para trabalhar na infraestrutura de exemplo existente, consulte o
-[README principal](../../README.md) e [a arquitetura geral](../../docs/architecture.md).
+Para inicialização local, use os comandos da raiz e consulte o
+[guia central de infraestrutura](../../infra/README.md), o [README principal](../../README.md)
+e [a arquitetura geral](../../docs/architecture.md). Variáveis locais ficam em
+`infra/.env`; não crie um segundo arquivo de ambiente dentro do app.
