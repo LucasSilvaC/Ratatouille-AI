@@ -7,7 +7,7 @@ updates:
       non-major:
         update-types: [minor, patch]
   - package-ecosystem: docker
-    directory: "/"
+    directory: "/infra/docker"
     schedule:
       interval: weekly
   - package-ecosystem: github-actions
