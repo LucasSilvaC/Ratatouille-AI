@@ -1,4 +1,4 @@
-FROM node:24.15.0-alpine AS base
+FROM node:26.13.0-alpine AS base
 WORKDIR /app
 RUN npm install -g pnpm@11.10.0
 
@@ -17,7 +17,7 @@ ENV NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
 COPY . .
 RUN pnpm build
 
-FROM node:24.15.0-alpine AS runner
+FROM node:26.13.0-alpine AS runner
 WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
