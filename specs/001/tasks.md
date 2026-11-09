@@ -1,4 +1,4 @@
-# Tasks: Acrux project template
+# Tasks: RatatouilleAI initial foundation
 
 - [x] T1 Scaffold Next.js with App Router, TypeScript, Tailwind, pnpm, and `src`.
 - [x] T2 Configure toolchain, Git hooks, Docker, CI, and governance files.
