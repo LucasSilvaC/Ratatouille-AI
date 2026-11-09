@@ -1,5 +1,7 @@
 # RatatouilleAI
 
+<img src="apps/web/public/brand/ratatouille-ai.svg" alt="Logo do RatatouilleAI: silhueta de Remy com touca de chef" width="112" height="112" />
+
 Monorepo com o web-app Next.js existente e estrutura documentada para agentes LLM,
 recomendação alimentar e rede neural em Python.
 
@@ -17,18 +19,25 @@ recomendação alimentar e rede neural em Python.
 | `contracts`               | Contratos OpenAPI e eventos                   | Somente documentação |
 
 Consulte [a arquitetura](docs/architecture.md) e os README.md de cada pasta.
-As telas e integrações do wireframe ainda não foram implementadas neste repositório.
+As telas do protótipo estão implementadas com dados locais demonstrativos: onboarding,
+calendário, edição de perfil e revisões de propostas. Não há integração de IA ou
+validação clínica. Veja [a arquitetura frontend e os cenários mockados](docs/frontend-demo.md).
+
+Para abrir apenas a demonstração, execute `pnpm install` e `pnpm dev`, depois acesse
+http://localhost:3000. A galeria fica em `/componentes`. Esse fluxo não exige banco
+ou variáveis de ambiente. Os dados são mantidos em memória e reiniciam ao recarregar.
 
 ## Desenvolvimento
 
-Requisitos: Node 24, pnpm 11 e Docker para PostgreSQL local. Na raiz:
+Requisitos: Node 24 e pnpm 11. Para desenvolver também a infraestrutura de banco
+existente, use Docker para PostgreSQL local. Na raiz:
 
 ```powershell
 pnpm install
 Copy-Item .env.example .env
 Copy-Item apps/web/.env.example apps/web/.env.local
 docker compose up -d postgres
-$env:DATABASE_URL = "postgres://acrux:acrux@localhost:5432/acrux_template"
+$env:DATABASE_URL = "postgres://ratatouille:ratatouille@localhost:5432/ratatouille_ai"
 pnpm db:migrate
 pnpm dev
 ```
@@ -65,7 +74,7 @@ Root Directory para acessar o workspace. A instalação usa o lockfile da raiz.
 
 ## Evolução
 
-Primeiro implementar API e um fluxo de geração/troca com regras e contratos.
+Evoluir os contratos frontend existentes para um adaptador de API e validação real.
 Depois conectar os agentes, jobs demorados e o preditor neural conforme existirem
 dados e avaliações. Cada pasta reservada descreve seu objetivo e seus limites.
 
