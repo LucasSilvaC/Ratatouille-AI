@@ -19,7 +19,22 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v7
 
-      - name: Check dependency changes
-        uses: actions/dependency-review-action@v5
+      # Audit the complete lockfile without relying on the repository's
+      # Dependency Review API, which is unavailable for this repository.
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v6
         with:
-          fail-on-severity: high
+          version: 11.10.0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Audit locked dependencies
+        run: pnpm audit --audit-level high
