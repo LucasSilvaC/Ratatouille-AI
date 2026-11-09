@@ -15,7 +15,9 @@ const actions = {
 const [action, ...extraArgs] = process.argv.slice(2);
 
 if (!action || !actions[action]) {
-  console.error(`Usage: node infra/scripts/compose.mjs <${Object.keys(actions).join("|")}> [args...]`);
+  console.error(
+    `Usage: node infra/scripts/compose.mjs <${Object.keys(actions).join("|")}> [args...]`,
+  );
   process.exit(2);
 }
 
