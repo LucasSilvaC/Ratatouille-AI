@@ -2,9 +2,11 @@
 
 ## Estado atual e destino
 
-O monorepo contém um web-app Next.js funcional em `apps/web`. API Python, worker,
-agentes, recomendação e rede neural são somente pastas documentadas. Não existem
-integrações de IA, endpoints Python, modelo treinado, broker ou pgvector ativos.
+O monorepo contém um web-app Next.js funcional em `apps/web`. Em `packages/agents`
+existe a Nutripédia, um RAG sobre a bibliografia de nutrição usado por linha de comando.
+API Python, worker, os agentes em si, recomendação e rede neural são somente pastas
+documentadas. Não existem endpoints Python, integração da IA com o web-app, modelo
+treinado, broker ou pgvector ativos.
 
 ```text
 apps/

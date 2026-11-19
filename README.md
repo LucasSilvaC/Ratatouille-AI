@@ -12,7 +12,7 @@ recomendação alimentar e rede neural em Python.
 | `apps/web`                | Interface e backend Next.js, Drizzle e testes             | Implementado                    |
 | `apps/ai-api`             | API Python/FastAPI                                        | Somente documentação            |
 | `apps/ai-worker`          | Execução assíncrona e jobs                                | Somente documentação            |
-| `packages/agents`         | NutriGuard, Chef Regional e integração LLM                | Somente documentação            |
+| `packages/agents`         | NutriGuard, Chef Regional e integração LLM                | Nutripédia (RAG) implementada   |
 | `packages/recommendation` | Políticas, busca, ranking e validação                     | Somente documentação            |
 | `packages/neural`         | Treinamento e inferência de afinidade                     | Somente documentação            |
 | `packages/ai-client`      | Cliente TypeScript gerado da API                          | Somente documentação            |

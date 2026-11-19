@@ -53,3 +53,9 @@ __pycache__/
 *.pt
 *.pth
 *.onnx
+
+# Nutripédia: PDFs da bibliografia, índice gerado e resultados de avaliação ficam fora do Git
+packages/agents/data/nutripedia/pdfs/
+packages/agents/data/nutripedia/indice/
+packages/agents/evals/nutripedia/resultados/
+*.egg-info/

@@ -1,0 +1,182 @@
+[
+  {
+    "pergunta": "O que são alimentos ultraprocessados?",
+    "arquivo": "guia-alimentar",
+    "termo": "formulações industriais"
+  },
+  {
+    "pergunta": "Qual é a regra de ouro do Guia Alimentar?",
+    "arquivo": "guia-alimentar",
+    "termo": "regra de ouro"
+  },
+  {
+    "pergunta": "Por que é recomendado fazer as refeições junto com outras pessoas?",
+    "arquivo": "guia-alimentar",
+    "termo": "comer em companhia"
+  },
+  {
+    "pergunta": "O que são alimentos in natura?",
+    "arquivo": "guia-alimentar",
+    "termo": "obtidos diretamente de plantas"
+  },
+  {
+    "pergunta": "Quais obstáculos dificultam seguir as recomendações do Guia Alimentar?",
+    "arquivo": "guia-alimentar",
+    "termo": "habilidades culinárias"
+  },
+  {
+    "pergunta": "Em que tipo de ambiente o guia recomenda fazer as refeições?",
+    "arquivo": "guia-alimentar",
+    "termo": "ambientes apropriados"
+  },
+  {
+    "pergunta": "Qual combinação de alimentos aparece em quase todos os almoços dos brasileiros?",
+    "arquivo": "guia-alimentar",
+    "termo": "feijão com arroz"
+  },
+  {
+    "pergunta": "Como se calcula o índice de massa corporal?",
+    "arquivo": "guia_de_bolso",
+    "termo": "IMC"
+  },
+  {
+    "pergunta": "Quanto tempo de atividade física por dia é recomendado?",
+    "arquivo": "guia_de_bolso",
+    "termo": "30 minutos"
+  },
+  {
+    "pergunta": "Qual é o tratamento para anafilaxia causada por alimentos?",
+    "arquivo": "food allergy",
+    "termo": "epinephrine"
+  },
+  {
+    "pergunta": "Qual é o padrão ouro para diagnosticar alergia alimentar?",
+    "arquivo": "food allergy",
+    "termo": "oral food challenge"
+  },
+  {
+    "pergunta": "Quais alergias alimentares costumam desaparecer durante a infância?",
+    "arquivo": "food allergy",
+    "termo": "milk, egg, soy and wheat"
+  },
+  {
+    "pergunta": "Que parcela da população tem alergia alimentar?",
+    "arquivo": "food allergy",
+    "termo": "estimated to affect"
+  },
+  {
+    "pergunta": "Quem tem alergia a ovo pode tomar vacina contra a gripe?",
+    "arquivo": "food allergy",
+    "termo": "influenza"
+  },
+  {
+    "pergunta": "O que é o diagnóstico resolvido por componentes?",
+    "arquivo": "food allergy",
+    "termo": "component-resolved"
+  },
+  {
+    "pergunta": "A alergia a amendoim é hereditária?",
+    "arquivo": "food allergy",
+    "termo": "heritability"
+  },
+  {
+    "pergunta": "Qual exame é considerado padrão ouro para diagnosticar a doença celíaca?",
+    "arquivo": "Francisconi",
+    "termo": "biópsia"
+  },
+  {
+    "pergunta": "Qual é o único tratamento conhecido para a doença celíaca?",
+    "arquivo": "Francisconi",
+    "termo": "dieta sem glúten"
+  },
+  {
+    "pergunta": "Quais proteínas formam o glúten?",
+    "arquivo": "Francisconi",
+    "termo": "glutenina"
+  },
+  {
+    "pergunta": "A aveia contém glúten?",
+    "arquivo": "Francisconi",
+    "termo": "avenina"
+  },
+  {
+    "pergunta": "Para que servem os anticorpos antiendomísio?",
+    "arquivo": "Francisconi",
+    "termo": "endomísio"
+  },
+  {
+    "pergunta": "O que a doença celíaca causa no intestino?",
+    "arquivo": "Francisconi",
+    "termo": "vilosidades"
+  },
+  {
+    "pergunta": "Quais cereais contêm glúten?",
+    "arquivo": "Francisconi",
+    "termo": "centeio"
+  },
+  {
+    "pergunta": "Quais alimentos podem substituir a farinha de trigo para quem não pode comer glúten?",
+    "arquivo": "Em Foco",
+    "termo": "substituir a farinha de trigo"
+  },
+  {
+    "pergunta": "Quais alimentos têm índice glicêmico alto?",
+    "arquivo": "DIABETES_MELLITUS",
+    "termo": "tapioca"
+  },
+  {
+    "pergunta": "Quais alimentos têm baixo índice glicêmico?",
+    "arquivo": "DIABETES_MELLITUS",
+    "termo": "baixo índice glicêmico"
+  },
+  {
+    "pergunta": "O que é o diabetes mellitus?",
+    "arquivo": "DIABETES_MELLITUS",
+    "termo": "hiperglicemia"
+  },
+  {
+    "pergunta": "Quais são as complicações crônicas do diabetes?",
+    "arquivo": "DIABETES_MELLITUS",
+    "termo": "retinopatia"
+  },
+  {
+    "pergunta": "Quais são os fatores de risco para o diabetes tipo 2?",
+    "arquivo": "DIABETES_MELLITUS",
+    "termo": "sedentarismo"
+  },
+  {
+    "pergunta": "Qual hormônio está envolvido no diabetes?",
+    "arquivo": "DIABETES_MELLITUS",
+    "termo": "insulina"
+  },
+  {
+    "pergunta": "Qual é a capital da Austrália?",
+    "arquivo": null,
+    "termo": null
+  },
+  {
+    "pergunta": "Como trocar o pneu de um carro?",
+    "arquivo": null,
+    "termo": null
+  },
+  {
+    "pergunta": "Quem escreveu Dom Casmurro?",
+    "arquivo": null,
+    "termo": null
+  },
+  {
+    "pergunta": "Qual é a dose diária de creatina recomendada para ganhar massa muscular?",
+    "arquivo": null,
+    "termo": null
+  },
+  {
+    "pergunta": "Qual é a dose diária recomendada de vitamina D para adultos?",
+    "arquivo": null,
+    "termo": null
+  },
+  {
+    "pergunta": "Qual é o melhor suplemento de whey protein?",
+    "arquivo": null,
+    "termo": null
+  }
+]
