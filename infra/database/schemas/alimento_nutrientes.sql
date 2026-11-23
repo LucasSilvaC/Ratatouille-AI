@@ -1,6 +1,6 @@
 CREATE TABLE "alimento_nutrientes" (
- alimento_codigo TEXT NOT NULL REFERENCES alimentos(codigo),
- nutriente_id INTEGER NOT NULL REFERENCES nutrientes(id),
+ alimento_codigo TEXT NOT NULL REFERENCES alimento(codigo),
+ nutriente_id INTEGER NOT NULL REFERENCES nutriente(id),
  valor_numerico REAL
  );
 

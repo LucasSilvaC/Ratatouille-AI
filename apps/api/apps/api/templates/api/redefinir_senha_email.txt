@@ -1,0 +1,5 @@
+Para redefinir a senha da conta {{ user.get_username }}, abra este link:
+
+{{ protocol }}://{{ domain }}{% url 'api:redefinir-senha-confirmar' uidb64=uid token=token %}
+
+Se você não solicitou a redefinição, ignore este e-mail.
