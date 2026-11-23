@@ -39,6 +39,37 @@ Nos comandos locais, `DATABASE_URL` é montada a partir das variáveis `POSTGRES
 Se precisar usar outro banco fora do Compose, defina `DATABASE_URL` em `infra/.env`.
 Dentro dos containers, o Compose monta a URL com o host interno `postgres`.
 
+## Django local
+
+Para verificar o projeto Django em `apps/api`, execute pela raiz com Python 3.14
+e o ambiente virtual local `apps/api/env`:
+
+```powershell
+python -m venv apps/api/env
+apps/api/env/Scripts/python.exe -m pip install -r apps/api/requirements.txt
+apps/api/env/Scripts/python.exe apps/api/manage.py check
+if (-not (Test-Path -LiteralPath apps/api/db.sqlite)) {
+    Copy-Item -LiteralPath infra/database/db.sqlite -Destination apps/api/db.sqlite
+}
+apps/api/env/Scripts/python.exe apps/api/manage.py migrate
+apps/api/env/Scripts/python.exe apps/api/manage.py runserver
+```
+
+O servidor local oferece o admin em `http://127.0.0.1:8000/admin/` e usa
+`apps/api/db.sqlite`. Copie a base versionada antes da primeira migração para
+incluir o catálogo alimentar. A migração inicial reconhece as tabelas existentes
+e registra o schema no Django. Em um SQLite vazio, ela cria apenas as tabelas.
+A migração inicial é irreversível para proteger os dados adotados.
+Para manter as sessões entre reinicializações, exporte `DJANGO_SECRET_KEY` no
+processo ou execute o servidor com o carregador de `infra/.env`.
+
+Os endpoints REST ficam em `/api/`. Solicite a recuperação de senha com
+`POST /api/redefinir_senha/` e o campo `email`. O link expira em uma hora.
+Para entrega real, configure as variáveis SMTP de `infra/.env.example` no ambiente
+do processo Django, inclua o domínio público em `DJANGO_ALLOWED_HOSTS` e use uma
+`DJANGO_SECRET_KEY` estável. A recuperação nativa atende contas ativas com
+e-mail cadastrado e senha utilizável.
+
 ## Layout
 
 - `compose.yaml`: serviços, dependências, health checks, volumes e portas.
