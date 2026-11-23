@@ -1,0 +1,54 @@
+"""Liga cada rota HTTP à view correspondente e dá nomes estáveis às rotas."""
+
+from django.contrib.auth.views import PasswordResetCompleteView
+from django.urls import path
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+
+from .accounts import views as accounts_views
+from .catalog import views as catalog_views
+from .questionnaire import views as questionnaire_views
+
+
+app_name = "api"
+urlpatterns = [
+    path("schema/", SpectacularAPIView.as_view(), name="schema"),
+    path("swagger/", SpectacularSwaggerView.as_view(url_name="api:schema"), name="swagger"),
+    path("token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    path("register/", accounts_views.CriarUsuarioAPIView.as_view(), name="register"),
+    path("senha/", accounts_views.TrocarSenhaAPIView.as_view(), name="trocar-senha"),
+    path("usuarios/", accounts_views.UsuarioListView.as_view(), name="usuario-list"),
+    path("usuarios/<int:pk>/", accounts_views.UsuarioDetailView.as_view(), name="usuario-detail"),
+    path("redefinir_senha/", accounts_views.ResetPasswordAPIView.as_view(), name="redefinir-senha"),
+    path(
+        "redefinir_senha/<uidb64>/<token>/",
+        accounts_views.ConfirmarRedefinicaoSenhaView.as_view(),
+        name="redefinir-senha-confirmar",
+    ),
+    path(
+        "redefinir_senha/concluida/",
+        PasswordResetCompleteView.as_view(template_name="api/redefinir_senha_concluida.html"),
+        name="redefinir-senha-concluida",
+    ),
+    path("classes/", catalog_views.ClasseListCreateView.as_view(), name="classe-list"),
+    path("classes/<int:pk>/", catalog_views.ClasseDetailView.as_view(), name="classe-detail"),
+    path("alimentos/", catalog_views.AlimentoListCreateView.as_view(), name="alimento-list"),
+    path("alimentos/<path:pk>/", catalog_views.AlimentoDetailView.as_view(), name="alimento-detail"),
+    path("nutrientes/", catalog_views.NutrienteListCreateView.as_view(), name="nutriente-list"),
+    path("nutrientes/<int:pk>/", catalog_views.NutrienteDetailView.as_view(), name="nutriente-detail"),
+    path(
+        "alimentos-nutrientes/",
+        catalog_views.AlimentoNutrienteListCreateView.as_view(),
+        name="alimento-nutriente-list",
+    ),
+    path(
+        "alimentos-nutrientes/<int:pk>/",
+        catalog_views.AlimentoNutrienteDetailView.as_view(),
+        name="alimento-nutriente-detail",
+    ),
+    path("perguntas/", questionnaire_views.PerguntaListCreateView.as_view(), name="pergunta-list"),
+    path("perguntas/<str:pk>/", questionnaire_views.PerguntaDetailView.as_view(), name="pergunta-detail"),
+    path("respostas/", questionnaire_views.RespostaListCreateView.as_view(), name="resposta-list"),
+    path("respostas/<str:pk>/", questionnaire_views.RespostaDetailView.as_view(), name="resposta-detail"),
+]

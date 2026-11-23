@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Redefinir senha</title>
+</head>
+<body>
+  <main>
+    <h1>Redefinir senha</h1>
+    {% if validlink %}
+      <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Salvar nova senha</button>
+      </form>
+    {% else %}
+      <p>Link inválido ou expirado. Solicite uma nova redefinição.</p>
+    {% endif %}
+  </main>
+</body>
+</html>

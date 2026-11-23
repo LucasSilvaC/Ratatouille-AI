@@ -48,6 +48,8 @@ next-env.d.ts
 __pycache__/
 *.py[cod]
 .venv/
+/apps/api/db.sqlite
+/apps/api/db.sqlite-*
 .pytest_cache/
 .ruff_cache/
 *.pt
