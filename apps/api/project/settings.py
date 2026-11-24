@@ -25,7 +25,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'drf_spectacular',
     'rest_framework',
-    'apps.api.apps.ApiConfig',
+    'apps.apps.ApiConfig',
     'corsheaders',
     'rest_framework_simplejwt.token_blacklist',
     'django_filters',

@@ -6,7 +6,7 @@ import django.contrib.auth.models
 import django.contrib.auth.validators
 import django.utils.timezone
 
-import apps.api.models
+import apps.models
 import django.db.models.deletion
 from django.db import migrations, models
 
@@ -146,7 +146,7 @@ class Migration(migrations.Migration):
                 migrations.CreateModel(
                     name='Pergunta',
                     fields=[
-                        ('id', models.TextField(default=apps.api.models.novo_uuid, editable=False, primary_key=True, serialize=False)),
+                        ('id', models.TextField(default=apps.models.novo_uuid, editable=False, primary_key=True, serialize=False)),
                         ('pergunta', models.TextField()),
                     ],
                     options={
@@ -156,7 +156,7 @@ class Migration(migrations.Migration):
                 migrations.CreateModel(
                     name='Resposta',
                     fields=[
-                        ('id', models.TextField(default=apps.api.models.novo_uuid, editable=False, primary_key=True, serialize=False)),
+                        ('id', models.TextField(default=apps.models.novo_uuid, editable=False, primary_key=True, serialize=False)),
                         ('resposta', models.TextField()),
                         ('categoria', models.TextField()),
                     ],
@@ -202,7 +202,7 @@ class Migration(migrations.Migration):
                 migrations.CreateModel(
                     name='Usuario',
                     fields=[
-                        ('id', models.TextField(default=apps.api.models.novo_uuid, editable=False, primary_key=True, serialize=False)),
+                        ('id', models.TextField(default=apps.models.novo_uuid, editable=False, primary_key=True, serialize=False)),
                         ('nome', models.TextField()),
                         ('idade', models.IntegerField(null=True)),
                         ('senha', models.TextField()),
