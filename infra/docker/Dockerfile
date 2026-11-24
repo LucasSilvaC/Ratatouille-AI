@@ -1,3 +1,24 @@
+FROM python:3.14-slim AS api
+WORKDIR /app
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    DJANGO_SETTINGS_MODULE=docker_settings
+COPY apps/api/requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY apps/api/manage.py .
+COPY apps/api/apps ./apps
+COPY apps/api/project ./project
+COPY infra/docker/django_settings.py ./docker_settings.py
+COPY infra/docker/start-api.sh /usr/local/bin/start-api
+COPY infra/database/db.sqlite /seed/db.sqlite
+RUN useradd --create-home --uid 1001 django \
+    && install -d -o django /data \
+    && python manage.py collectstatic --noinput
+USER django
+EXPOSE 8000
+ENTRYPOINT ["/bin/sh", "/usr/local/bin/start-api"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "project.wsgi:application"]
+
 FROM node:26.13.1-alpine AS base
 WORKDIR /app
 RUN npm install -g pnpm@11.10.0
