@@ -60,5 +60,38 @@ services:
       start_period: 60s
     restart: unless-stopped
 
+  api:
+    build:
+      context: ..
+      dockerfile: infra/docker/Dockerfile
+      target: api
+    environment:
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost 127.0.0.1}
+      DJANGO_EMAIL_HOST: ${DJANGO_EMAIL_HOST:-localhost}
+      DJANGO_EMAIL_PORT: ${DJANGO_EMAIL_PORT:-587}
+      DJANGO_EMAIL_HOST_USER: ${DJANGO_EMAIL_HOST_USER:-}
+      DJANGO_EMAIL_HOST_PASSWORD: ${DJANGO_EMAIL_HOST_PASSWORD:-}
+      DJANGO_EMAIL_USE_TLS: ${DJANGO_EMAIL_USE_TLS:-true}
+      DJANGO_DEFAULT_FROM_EMAIL: ${DJANGO_DEFAULT_FROM_EMAIL:-webmaster@localhost}
+    ports:
+      - "${API_PORT:-8000}:8000"
+    volumes:
+      - api-data:/data
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "from urllib.request import urlopen; urlopen('http://127.0.0.1:8000/admin/login/', timeout=3).close()",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    restart: unless-stopped
+
 volumes:
   postgres-data:
+  api-data:
