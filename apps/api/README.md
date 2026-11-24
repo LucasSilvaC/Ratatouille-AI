@@ -26,7 +26,7 @@ No Swagger, envie `username` e `password` para `POST /api/token/`. Cole o valor 
 
 ## Onde a requisição passa
 
-1. [project/urls.py](project/urls.py) encaminha os caminhos que começam com `/api/` para [apps/api/urls.py](apps/api/urls.py). Esse segundo arquivo liga cada caminho à sua view e define seu nome para uso com `reverse()`.
+1. [project/urls.py](project/urls.py) encaminha os caminhos que começam com `/api/` para [apps/urls.py](apps/urls.py). Esse segundo arquivo liga cada caminho à sua view e define seu nome para uso com `reverse()`.
 2. A **view** executa a operação HTTP. Por exemplo, `ListCreateAPIView` implementa `GET` para listar e `POST` para criar. A view declara quais permissões se aplicam e qual conjunto de registros pode ser consultado.
 3. O DRF lê o JSON recebido e entrega dados Python ao **serializer**, que os valida antes de salvar. Na saída, o serializer converte os registros em valores simples que o DRF pode renderizar como JSON.
 4. O **modelo** representa a tabela no ORM. Métodos como `Alimento.objects.filter(...)` montam uma consulta, e o Django gera o SQL ao avaliar o resultado. Restrições e relações também podem ser impostas diretamente pelo banco.
@@ -35,15 +35,15 @@ Views de listagem aplicam filtros ao conjunto autorizado e só então paginam os
 
 ## Onde fazer alterações
 
-| Caminho                                                                                                             | Responsabilidade                                                                                                                                    |
-| ------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [accounts/](apps/api/accounts/)                                                                                     | Cadastro, perfil e senhas. A troca autenticada e a confirmação por e-mail usam a mesma operação para atualizar a senha e revogar tokens anteriores. |
-| [catalog/](apps/api/catalog/)                                                                                       | Classes, alimentos, nutrientes e medições. `filters.py` descreve filtros de listagem que também aparecem no Swagger.                                |
-| [questionnaire/](apps/api/questionnaire/)                                                                           | Perguntas e respostas. As respostas ficam restritas ao próprio autor, inclusive quando outro usuário faz parte da equipe.                           |
-| [models.py](apps/api/models.py)                                                                                     | Modelos compartilhados. `User` amplia o usuário do Django e usa a tabela `auth_user`.                                                               |
-| [permissions.py](apps/api/permissions.py), [pagination.py](apps/api/pagination.py), [mixins.py](apps/api/mixins.py) | Regras reutilizadas. Catálogo e perguntas permitem leitura autenticada e escrita por staff. Uma exclusão bloqueada por vínculo retorna HTTP `409`.  |
-| [templates/api/](apps/api/templates/api/)                                                                           | Assunto e corpo do e-mail de recuperação e páginas de confirmação servidas pelo Django. A entrega real usa SMTP.                                    |
-| [migrations/](apps/api/migrations/README.md) e [tests/](apps/api/tests/README.md)                                   | Histórico do banco e testes automatizados.                                                                                                          |
+| Caminho                                                                                                 | Responsabilidade                                                                                                                                    |
+| ------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [accounts/](apps/accounts/)                                                                             | Cadastro, perfil e senhas. A troca autenticada e a confirmação por e-mail usam a mesma operação para atualizar a senha e revogar tokens anteriores. |
+| [catalog/](apps/catalog/)                                                                               | Classes, alimentos, nutrientes e medições. `filters.py` descreve filtros de listagem que também aparecem no Swagger.                                |
+| [questionnaire/](apps/questionnaire/)                                                                   | Perguntas e respostas. As respostas ficam restritas ao próprio autor, inclusive quando outro usuário faz parte da equipe.                           |
+| [models.py](apps/models.py)                                                                             | Modelos compartilhados. `User` amplia o usuário do Django e usa a tabela `auth_user`.                                                               |
+| [permissions.py](apps/permissions.py), [pagination.py](apps/pagination.py), [mixins.py](apps/mixins.py) | Regras reutilizadas. Catálogo e perguntas permitem leitura autenticada e escrita por staff. Uma exclusão bloqueada por vínculo retorna HTTP `409`.  |
+| [templates/api/](apps/templates/api/)                                                                   | Assunto e corpo do e-mail de recuperação e páginas de confirmação servidas pelo Django. A entrega real usa SMTP.                                    |
+| [migrations/](apps/migrations/README.md) e [tests/](apps/tests/README.md)                               | Histórico do banco e testes automatizados.                                                                                                          |
 
 Por exemplo, `GET /api/alimentos/?descricao=banana&classe=8` combina a busca por trecho de descrição e o ID da classe. Use `search` para buscar pelo código, pela descrição ou pelo nome da classe no mesmo parâmetro.
 

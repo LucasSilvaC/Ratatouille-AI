@@ -5,8 +5,8 @@ Os módulos `test_*.py` são descobertos pelo executor de testes do Django. Ele 
 Execute a suíte ou um módulo específico a partir da raiz.
 
 ```powershell
-apps/api/env/Scripts/python.exe apps/api/manage.py test apps.api
-apps/api/env/Scripts/python.exe apps/api/manage.py test apps.api.tests.test_filters
+apps/api/env/Scripts/python.exe apps/api/manage.py test apps.tests
+apps/api/env/Scripts/python.exe apps/api/manage.py test apps.tests.test_filters
 ```
 
 - `test_models.py` verifica regras do ORM e restrições SQL.
