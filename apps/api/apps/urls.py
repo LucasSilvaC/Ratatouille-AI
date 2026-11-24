@@ -6,8 +6,8 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from .accounts import views as accounts_views
-from .catalog import views as catalog_views
-from .questionnaire import views as questionnaire_views
+from .foods import views as foods_views
+from .diagnosis import views as diagnosis_views
 
 
 app_name = "api"
@@ -31,24 +31,24 @@ urlpatterns = [
         PasswordResetCompleteView.as_view(template_name="api/redefinir_senha_concluida.html"),
         name="redefinir-senha-concluida",
     ),
-    path("classes/", catalog_views.ClasseListCreateView.as_view(), name="classe-list"),
-    path("classes/<int:pk>/", catalog_views.ClasseDetailView.as_view(), name="classe-detail"),
-    path("alimentos/", catalog_views.AlimentoListCreateView.as_view(), name="alimento-list"),
-    path("alimentos/<path:pk>/", catalog_views.AlimentoDetailView.as_view(), name="alimento-detail"),
-    path("nutrientes/", catalog_views.NutrienteListCreateView.as_view(), name="nutriente-list"),
-    path("nutrientes/<int:pk>/", catalog_views.NutrienteDetailView.as_view(), name="nutriente-detail"),
+    path("classes/", foods_views.ClasseListCreateView.as_view(), name="classe-list"),
+    path("classes/<int:pk>/", foods_views.ClasseDetailView.as_view(), name="classe-detail"),
+    path("alimentos/", foods_views.AlimentoListCreateView.as_view(), name="alimento-list"),
+    path("alimentos/<path:pk>/", foods_views.AlimentoDetailView.as_view(), name="alimento-detail"),
+    path("nutrientes/", foods_views.NutrienteListCreateView.as_view(), name="nutriente-list"),
+    path("nutrientes/<int:pk>/", foods_views.NutrienteDetailView.as_view(), name="nutriente-detail"),
     path(
         "alimentos-nutrientes/",
-        catalog_views.AlimentoNutrienteListCreateView.as_view(),
+        foods_views.AlimentoNutrienteListCreateView.as_view(),
         name="alimento-nutriente-list",
     ),
     path(
         "alimentos-nutrientes/<int:pk>/",
-        catalog_views.AlimentoNutrienteDetailView.as_view(),
+        foods_views.AlimentoNutrienteDetailView.as_view(),
         name="alimento-nutriente-detail",
     ),
-    path("perguntas/", questionnaire_views.PerguntaListCreateView.as_view(), name="pergunta-list"),
-    path("perguntas/<str:pk>/", questionnaire_views.PerguntaDetailView.as_view(), name="pergunta-detail"),
-    path("respostas/", questionnaire_views.RespostaListCreateView.as_view(), name="resposta-list"),
-    path("respostas/<str:pk>/", questionnaire_views.RespostaDetailView.as_view(), name="resposta-detail"),
+    path("perguntas/", diagnosis_views.PerguntaListCreateView.as_view(), name="pergunta-list"),
+    path("perguntas/<str:pk>/", diagnosis_views.PerguntaDetailView.as_view(), name="pergunta-detail"),
+    path("respostas/", diagnosis_views.RespostaListCreateView.as_view(), name="resposta-list"),
+    path("respostas/<str:pk>/", diagnosis_views.RespostaDetailView.as_view(), name="resposta-detail"),
 ]
