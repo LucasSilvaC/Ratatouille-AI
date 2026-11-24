@@ -6,4 +6,6 @@
 **/playwright-report
 **/test-results
 **/.venv
+apps/api/env
+apps/api/db.sqlite*
 **/__pycache__

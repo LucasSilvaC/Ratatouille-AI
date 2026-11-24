@@ -15,8 +15,9 @@ comando `pnpm infra:up` instala as dependências dentro das imagens; não exige
 pnpm infra:up
 ```
 
-`pnpm infra:up` constrói o web-app e a imagem de migração, aguarda o PostgreSQL,
-aplica as migrações e inicia o app. Os padrões funcionam sem arquivo de ambiente.
+`pnpm infra:up` constrói e inicia o web-app e a API Django. O web-app aguarda as
+migrações no PostgreSQL. A API aplica as migrações no próprio SQLite antes de
+iniciar o Gunicorn. Os padrões funcionam sem arquivo de ambiente.
 Para ajustar portas e credenciais, copie `infra/.env.example` para `infra/.env` antes
 de iniciar. O arquivo `.env` é local e ignorado pelo Git.
 
@@ -38,6 +39,25 @@ usam os padrões descritos em `infra/.env.example`.
 Nos comandos locais, `DATABASE_URL` é montada a partir das variáveis `POSTGRES_*`.
 Se precisar usar outro banco fora do Compose, defina `DATABASE_URL` em `infra/.env`.
 Dentro dos containers, o Compose monta a URL com o host interno `postgres`.
+
+## API Django no Docker
+
+Para construir e iniciar somente a API, execute pela raiz:
+
+```powershell
+pnpm infra:up api
+```
+
+A API atende na porta `API_PORT` (8000 por padrão) e oferece o Swagger em
+`http://localhost:8000/api/swagger/`. Na primeira inicialização, o container
+copia o catálogo versionado para o volume `api-data`. Ao recriar o container,
+ele reaproveita o SQLite desse volume e aplica as migrações pendentes. Faça backup
+do volume antes de atualizar a API com migrações.
+
+Para deploy público, configure `DJANGO_ALLOWED_HOSTS` com o domínio da API em
+`infra/.env` e publique o serviço atrás de um proxy HTTPS. Defina uma
+`DJANGO_SECRET_KEY` estável ou mantenha a chave gerada no volume `api-data`.
+Use as variáveis SMTP do mesmo arquivo para habilitar o envio real de e-mails.
 
 ## Django local
 
@@ -73,7 +93,7 @@ e-mail cadastrado e senha utilizável.
 ## Layout
 
 - `compose.yaml`: serviços, dependências, health checks, volumes e portas.
-- `docker/Dockerfile`: imagens e etapas de build do app e do migrador.
+- `docker/Dockerfile`: imagens do web-app, do migrador e da API Django.
 - `docker/Dockerfile.dockerignore`: arquivos excluídos do contexto de build.
 - `.env.example`: variáveis locais compartilhadas entre Compose e comandos locais.
 - `scripts/with-env.mjs`: carrega a configuração central e inicia comandos locais.
@@ -97,6 +117,5 @@ os serviços existentes funcionais. Não replique configuração operacional den
 próprios de cada pacote continuam junto ao pacote; `infra/` define como o ambiente o
 configura e o inicia.
 
-O Compose atual contém apenas PostgreSQL, migração Drizzle e o web-app. API Python,
-worker, broker e serviços de IA devem ser adicionados aqui quando suas implementações
-estiverem prontas; as pastas documentadas ainda não são serviços executáveis.
+Worker, broker e serviços de IA devem ser adicionados aqui quando suas
+implementações estiverem prontas.
