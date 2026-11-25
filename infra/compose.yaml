@@ -74,7 +74,31 @@ services:
 
   api-db-init:
     image: postgres:18-alpine
-    command: ["psql", "-X", "-v", "ON_ERROR_STOP=1", "-f", "/bootstrap-api.sql"]
+    command:
+      - /bin/sh
+      - -ec
+      - |
+        case "$$DJANGO_PUBLIC_DEPLOYMENT" in
+          [Tt][Rr][Uu][Ee])
+            case "$$PGPASSWORD" in
+              ""|ratatouille|ratatouille_api)
+                echo "Configure uma credencial própria em POSTGRES_PASSWORD para o modo público." >&2
+                exit 1
+                ;;
+            esac
+            case "$$DJANGO_DB_PASSWORD" in
+              ""|ratatouille|ratatouille_api)
+                echo "Configure uma credencial própria em DJANGO_DB_PASSWORD para o modo público." >&2
+                exit 1
+                ;;
+            esac
+            if [ "$$PGPASSWORD" = "$$DJANGO_DB_PASSWORD" ]; then
+              echo "Use credenciais distintas em POSTGRES_PASSWORD e DJANGO_DB_PASSWORD." >&2
+              exit 1
+            fi
+            ;;
+        esac
+        exec psql -X -v ON_ERROR_STOP=1 -f /bootstrap-api.sql
     environment:
       PGHOST: postgres
       PGDATABASE: postgres
@@ -84,6 +108,7 @@ services:
       DJANGO_DB_NAME: ${DJANGO_DB_NAME:-ratatouille_api}
       DJANGO_DB_USER: ${DJANGO_DB_USER:-ratatouille_api}
       DJANGO_DB_PASSWORD: ${DJANGO_DB_PASSWORD:-ratatouille_api}
+      DJANGO_PUBLIC_DEPLOYMENT: ${DJANGO_PUBLIC_DEPLOYMENT:-false}
     volumes:
       - ./database/bootstrap-api.sql:/bootstrap-api.sql:ro
     depends_on:
