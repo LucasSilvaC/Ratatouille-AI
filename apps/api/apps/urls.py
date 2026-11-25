@@ -1,10 +1,12 @@
 """Liga cada rota HTTP à view correspondente e dá nomes estáveis às rotas."""
 
+from django.conf import settings
 from django.contrib.auth.views import PasswordResetCompleteView
 from django.http import JsonResponse
 from django.urls import path
 from django.views.decorators.http import require_safe
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
+from rest_framework.permissions import BasePermission
 
 from .accounts import views as accounts_views
 from .foods import views as foods_views
@@ -14,6 +16,11 @@ from .diagnosis import views as diagnosis_views
 app_name = "api"
 
 
+class LocalDocumentationPermission(BasePermission):
+    def has_permission(self, request, view):
+        return not settings.PUBLIC_DEPLOYMENT
+
+
 @require_safe
 def health(_request):
     return JsonResponse({"status": "ok"})
@@ -21,8 +28,21 @@ def health(_request):
 
 urlpatterns = [
     path("health/", health, name="health"),
-    path("schema/", SpectacularAPIView.as_view(), name="schema"),
-    path("swagger/", SpectacularSwaggerView.as_view(url_name="api:schema"), name="swagger"),
+    path(
+        "schema/",
+        SpectacularAPIView.as_view(
+            authentication_classes=[], permission_classes=[LocalDocumentationPermission]
+        ),
+        name="schema",
+    ),
+    path(
+        "swagger/",
+        SpectacularSwaggerView.as_view(
+            url_name="api:schema", authentication_classes=[],
+            permission_classes=[LocalDocumentationPermission],
+        ),
+        name="swagger",
+    ),
     path("token/", accounts_views.LoginAPIView.as_view(), name="token_obtain_pair"),
     path("token/refresh/", accounts_views.RenovarTokenAPIView.as_view(), name="token_refresh"),
     path("register/", accounts_views.CriarUsuarioAPIView.as_view(), name="register"),

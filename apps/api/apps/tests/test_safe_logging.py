@@ -23,3 +23,27 @@ class SafeLoggingTests(SimpleTestCase):
         handler.handle(record)
 
         self.assertEqual(output.getvalue(), "ERROR django.request status=500\n")
+
+    def test_audit_logs_only_allowed_event_and_correlation_metadata(self):
+        formatter = logging.getLogger("django.request").handlers[0].formatter
+        logger = logging.getLogger("api.audit")
+        record = logger.makeRecord(
+            logger.name, logging.INFO, __file__, 1, "user@example.test", (), None,
+            extra={
+                "status_code": 204,
+                "event": "answer.delete",
+                "request_id": "a" * 32,
+                "actor_id": 42,
+                "raw_path": "/api/respostas/id-privado",
+                "password": "senha",
+                "failure_code": "private-token",
+                "route": "private-route",
+            },
+        )
+        record.created = 0
+
+        self.assertEqual(
+            formatter.format(record),
+            f"INFO api.audit status=204 event=answer.delete request_id={'a' * 32} "
+            "actor_id=42 timestamp=1970-01-01T00:00:00.000+00:00",
+        )

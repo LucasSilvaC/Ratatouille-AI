@@ -6,6 +6,7 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MinLengthValidator
 from django.db import models
+from django.db.models.functions import Lower
 from django.db.models.functions import Length
 from django.db.models.lookups import Exact
 from django.utils import timezone
@@ -119,6 +120,7 @@ class Resposta(models.Model):
 
 class User(AbstractUser):
     id = models.AutoField(primary_key=True)
+    email_confirmado = models.EmailField(blank=True, default="", editable=False)
     nome = models.TextField(blank=True, default="")
     idade = models.IntegerField(null=True, blank=True)
     genero = models.TextField(null=True, blank=True)
@@ -129,6 +131,10 @@ class User(AbstractUser):
     class Meta:
         db_table = "auth_user"
         constraints = [
+            models.UniqueConstraint(
+                Lower("email_confirmado"), condition=~models.Q(email_confirmado=""),
+                name="usuario_email_confirmado_unico",
+            ),
             models.CheckConstraint(condition=models.Q(idade__gte=0), name="usuario_idade_valida"),
             models.CheckConstraint(condition=models.Q(peso__gt=0), name="usuario_peso_valido"),
             models.CheckConstraint(condition=models.Q(altura__gt=0), name="usuario_altura_valida"),

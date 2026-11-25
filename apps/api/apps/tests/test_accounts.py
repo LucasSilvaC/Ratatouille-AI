@@ -43,7 +43,7 @@ class RegistroTests(APITestCase):
                     "/api/register/", {"username": "pessoa", **payload}, format="json"
                 )
                 self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-                self.assertIn(field, response.data)
+                self.assertIn(field, response.json()["fields"])
         self.assertFalse(get_user_model().objects.exists())
 
     def test_registro_valida_unicidade_do_username_normalizado(self):
@@ -58,7 +58,7 @@ class RegistroTests(APITestCase):
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("username", response.data)
+        self.assertIn("username", response.json()["fields"])
 
 
 class PerfilTests(APITestCase):
@@ -109,7 +109,7 @@ class PerfilTests(APITestCase):
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(set(response.data), {"idade", "peso", "altura", "disposicao"})
+        self.assertEqual(set(response.json()["fields"]), {"idade", "peso", "altura", "disposicao"})
 
     def test_atualizacao_de_perfil_preserva_troca_de_senha_concorrente(self):
         serializer = UsuarioSerializer(self.owner, data={"nome": "Alterado"}, partial=True)
@@ -161,12 +161,12 @@ class AutenticacaoTests(APITestCase):
             url, {"senha_atual": "incorreta", "nova_senha": nova_senha}, format="json"
         )
         self.assertEqual(invalid.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("senha_atual", invalid.data)
+        self.assertIn("senha_atual", invalid.json()["fields"])
         weak = self.client.post(
             url, {"senha_atual": VALID_PASSWORD, "nova_senha": "123"}, format="json"
         )
         self.assertEqual(weak.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("nova_senha", weak.data)
+        self.assertIn("password_too_short", weak.json()["fields"]["nova_senha"])
 
         response = self.client.post(
             url, {"senha_atual": VALID_PASSWORD, "nova_senha": nova_senha}, format="json"

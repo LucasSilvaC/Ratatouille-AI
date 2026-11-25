@@ -22,4 +22,31 @@ node infra/scripts/with-env.mjs apps/api/env/Scripts/python.exe apps/api/manage.
 - `test_filters.py` verifica filtros combinados e a separação entre respostas de autores diferentes.
 - `test_password_recovery.py` testa o e-mail com o backend em memória, segue o link gerado e verifica a invalidação de tokens antigos.
 
+## Cenários de segurança do piloto
+
+| Cenário                                                                    | Validação                                                                   |
+| -------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| Requisição anônima, JWT expirado e limites de conta                        | `test_api_errors.py`, `test_access_protection.py`                           |
+| Titular, outro usuário e staff em contas, catálogo e respostas             | `test_accounts.py`, `test_foods.py`, `test_diagnosis.py`, `test_privacy.py` |
+| Cadastro fechado, provisionamento, e-mail confirmado e recuperação         | `test_pilot_accounts.py`, `test_password_recovery.py`                       |
+| Campos inválidos, erros seguros e preservação do cabeçalho de autenticação | `test_api_errors.py` e testes de contrato por recurso                       |
+| Correlação e metadados permitidos na auditoria                             | `test_audit.py`, `test_safe_logging.py`                                     |
+| Respostas cifradas e acesso interno limitado ao escopo                     | `test_response_encryption.py`                                               |
+| Inicialização do modo público e rejeição de configurações inseguras        | `test_deployment_settings.py`                                               |
+
+`test_privacy.py` usa JWTs reais para verificar leitura, listagem filtrada,
+alteração e exclusão entre contas comuns e staff. Também verifica as
+diretivas `private` e `no-store` em respostas com dados de conta ou metadados
+do questionário respondido.
+
+`test_api_errors.py` cobre JSON inválido e a sanitização de erros construídos
+fora do handler central. `test_audit.py` verifica a correlação de falhas
+de banco e SMTP. `test_safe_logging.py` verifica que os campos permitidos
+não carregam valores privados ou códigos fora da lista.
+
+No ambiente do piloto, confira HTTPS e isolamento da porta da API, siga um
+link de recuperação usando uma conta de teste e confirme que o proxy não
+registra o link. Compare o `X-Request-ID` de uma resposta da API com o evento
+correspondente no Django e com o registro do proxy, quando habilitado.
+
 Para um endpoint novo, comece com `APITestCase` e chame sua URL usando `self.client`. Teste o resultado que o consumidor pode observar, como status e campos retornados. Use `force_authenticate` quando o teste avalia a permissão ou a operação do recurso. Para testar JWT, obtenha um token pela rota e envie o cabeçalho real.

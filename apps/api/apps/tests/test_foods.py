@@ -78,7 +78,7 @@ class CatalogAPITests(APITestCase):
         response = self.client.patch(detail, {"codigo": "F00002"}, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("codigo", response.data)
+        self.assertIn("codigo", response.json()["fields"])
         self.assertEqual(self.client.get(collection).data["count"], 1)
         self.assertEqual(self.client.get(detail).data["codigo"], "F00001")
 
@@ -129,7 +129,7 @@ class CatalogAPITests(APITestCase):
         )
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("valor_numerico", response.data)
+        self.assertIn("valor_numerico", response.json()["fields"])
 
     def test_remocao_de_registros_referenciados_e_rejeitada(self):
         classe = self.criar_classe()
@@ -181,4 +181,4 @@ class CatalogAPITests(APITestCase):
             with self.subTest(fields=fields):
                 response = self.client.post("/api/alimentos/", {**data, **fields}, format="json")
                 self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-                self.assertIn(error_field, response.data)
+                self.assertIn(error_field, response.json()["fields"])
