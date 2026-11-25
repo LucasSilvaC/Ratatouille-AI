@@ -1,12 +1,20 @@
 # Testes da API
 
-Os módulos `test_*.py` são descobertos pelo executor de testes do Django. Ele cria um banco de teste separado. A base local usada pela API fica disponível para desenvolvimento.
+Os módulos `test_*.py` são descobertos pelo executor de testes do Django. Ele cria
+e remove uma base PostgreSQL separada. Use uma credencial com `CREATEDB` em uma
+instância de desenvolvimento descartável e configure a conexão pelas variáveis
+`DJANGO_DB_*` do [guia de infraestrutura](../../../../infra/README.md).
+
+Configure também `DJANGO_RESPONSE_KMS_KEY_ID` e `DJANGO_RESPONSE_PUBLIC_KEY`
+com uma chave RSA descartável para os testes de gravação. A API precisa apenas
+da parte pública. O teste do adaptador interno usa sua própria chave local
+para simular o AWS KMS.
 
 Execute a suíte ou um módulo específico a partir da raiz.
 
 ```powershell
-apps/api/env/Scripts/python.exe apps/api/manage.py test apps.tests
-apps/api/env/Scripts/python.exe apps/api/manage.py test apps.tests.test_filters
+node infra/scripts/with-env.mjs apps/api/env/Scripts/python.exe apps/api/manage.py test apps.tests
+node infra/scripts/with-env.mjs apps/api/env/Scripts/python.exe apps/api/manage.py test apps.tests.test_filters
 ```
 
 - `test_models.py` verifica regras do ORM e restrições SQL.
