@@ -77,3 +77,68 @@ campos do perfil alimentar. Veja a
 O Django cifra as respostas antes de gravar e retorna apenas metadados
 ao titular autenticado, inclusive após envio ou edição. O titular pode
 substituir ou excluir uma resposta e filtrar a listagem por `pergunta`.
+As rotas de perfil, listagem de contas e respostas do questionário retornam
+`Cache-Control: private, no-store` em operações bem-sucedidas para evitar a
+reutilização por caches.
+
+## Erros e auditoria
+
+As rotas DRF exigem autenticação por padrão. As exceções são declaradas nas
+rotas públicas de conta e na documentação, disponível apenas em ambiente local.
+O health check continua público.
+
+### Provisionamento de contas do piloto
+
+Confirme a posse do e-mail antes de provisionar cada conta. Com as migrações
+aplicadas, execute a partir da raiz:
+
+```sh
+docker compose --env-file infra/.env -f infra/compose.yaml exec api python manage.py provision_pilot_account
+```
+
+Informe o nome de usuário e o e-mail confirmado. Oriente a pessoa a definir
+a senha pelo fluxo de recuperação. Use `--staff` apenas para operadores
+autorizados a alterar catálogo e perguntas. Contas anteriores à migração
+precisam de revisão antes de ingressar no piloto.
+
+Erros em `/api/` retornam JSON com `code`, `message` e `request_id`. Erros de
+validação incluem `fields`, com os códigos por campo, como
+`{"email": ["invalid"]}`. Os status HTTP e cabeçalhos como `WWW-Authenticate`
+e `Retry-After` continuam disponíveis. O cabeçalho `X-Request-ID` identifica
+também respostas bem-sucedidas.
+
+O logger `api.audit` registra operações de conta e respostas, escritas no
+catálogo e no questionário e falhas internas da API. A trilha usa evento,
+hora UTC, status, ID de requisição e, quando identificado na requisição, ID interno
+do ator. Restrinja o acesso aos logs e defina a retenção no ambiente do piloto.
+Confira a [matriz de testes](apps/tests/README.md#cenários-de-segurança-do-piloto).
+
+### Política de validação
+
+- Defina campos de entrada, tipos, limites e obrigatoriedade nos serializers.
+  Valide combinações de campos no serializer e filtros pelo contrato da rota.
+- Derive titularidade e privilégios da autenticação. Declare campos de saída
+  explicitamente, mantenha segredos como somente escrita e preserve as
+  restrições do banco como última linha de validação da integridade.
+- Use o handler central para exceções do DRF. Retorne códigos estáveis por
+  campo e mensagens gerais, sem valores recebidos. Preserve status e
+  cabeçalhos de autenticação, métodos permitidos e espera para nova tentativa.
+  Falhas inesperadas retornam um erro genérico.
+
+### Política de logs do piloto
+
+- A trilha permite apenas evento predefinido, horário UTC, nível, status,
+  ID de requisição e ID interno do ator autenticado quando identificado.
+  O ID do ator é um dado pessoal indireto. Restrinja o acesso à trilha e
+  defina a retenção no coletor.
+- Falhas aceitam códigos fixos para banco, configuração, SMTP e causa
+  inesperada. Quando não houver um evento específico para um erro interno,
+  a trilha pode incluir o nome estático da rota. O `202` da recuperação
+  sinaliza o recebimento da solicitação. Uma falha de envio conhecida é
+  registrada internamente com o mesmo ID de requisição.
+- Exclua dos logs senhas, JWTs, links de recuperação, cookies, cabeçalhos,
+  chaves, credenciais de serviço, e-mails, nomes, IPs, IDs de conta-alvo,
+  conteúdo do perfil e do questionário, corpos HTTP, URLs e seus parâmetros,
+  SQL com valores, mensagens de exceção e stack traces brutos.
+- Aplique a política também ao proxy, aos logs da hospedagem e ao coletor
+  conforme o [guia de infraestrutura](../../infra/README.md).
