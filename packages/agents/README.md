@@ -7,7 +7,8 @@ recommendation; um parecer do LLM não substitui essa validação.
 
 Status: **a Nutripédia (RAG sobre a bibliografia) está implementada** em
 `src/ratatouille_agents/tools/nutripedia`, com testes e avaliação. Agentes, workflows e a
-integração com a API ainda são planejados.
+integração com a API ainda são planejados. Um protótipo do Guardião em HTML, fora do pacote
+Python, está em [`prototipos/nutriguard`](prototipos/nutriguard/README.md).
 
 ## Nutripédia
 
