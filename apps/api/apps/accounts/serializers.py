@@ -14,6 +14,12 @@ def validar_senha(password, user, field):
         raise serializers.ValidationError({field: error.messages}) from error
 
 
+class IdentificacaoUsuarioSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = get_user_model()
+        fields = ("id", "username")
+
+
 class UsuarioSerializer(serializers.ModelSerializer):
     class Meta:
         model = get_user_model()

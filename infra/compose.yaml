@@ -3,16 +3,28 @@ name: ratatouille-ai
 services:
   postgres:
     image: postgres:18-alpine
+    command:
+      - postgres
+      - -c
+      - log_statement=none
+      - -c
+      - log_min_error_statement=panic
+      - -c
+      - log_parameter_max_length=0
+      - -c
+      - log_parameter_max_length_on_error=0
+      - -c
+      - log_min_messages=fatal
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-ratatouille}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ratatouille}
       POSTGRES_DB: ${POSTGRES_DB:-ratatouille_ai}
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres-data:/var/lib/postgresql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -60,13 +72,40 @@ services:
       start_period: 60s
     restart: unless-stopped
 
+  api-db-init:
+    image: postgres:18-alpine
+    command: ["psql", "-X", "-v", "ON_ERROR_STOP=1", "-f", "/bootstrap-api.sql"]
+    environment:
+      PGHOST: postgres
+      PGDATABASE: postgres
+      PGUSER: ${POSTGRES_USER:-ratatouille}
+      PGPASSWORD: ${POSTGRES_PASSWORD:-ratatouille}
+      WEB_DB_NAME: ${POSTGRES_DB:-ratatouille_ai}
+      DJANGO_DB_NAME: ${DJANGO_DB_NAME:-ratatouille_api}
+      DJANGO_DB_USER: ${DJANGO_DB_USER:-ratatouille_api}
+      DJANGO_DB_PASSWORD: ${DJANGO_DB_PASSWORD:-ratatouille_api}
+    volumes:
+      - ./database/bootstrap-api.sql:/bootstrap-api.sql:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
   api:
     build:
       context: ..
       dockerfile: infra/docker/Dockerfile
       target: api
     environment:
+      DJANGO_DB_HOST: postgres
+      DJANGO_DB_PORT: 5432
+      DJANGO_DB_NAME: ${DJANGO_DB_NAME:-ratatouille_api}
+      DJANGO_DB_USER: ${DJANGO_DB_USER:-ratatouille_api}
+      DJANGO_DB_PASSWORD: ${DJANGO_DB_PASSWORD:-ratatouille_api}
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-}
+      DJANGO_RESPONSE_KMS_KEY_ID: ${DJANGO_RESPONSE_KMS_KEY_ID:-}
+      DJANGO_RESPONSE_PUBLIC_KEY: ${DJANGO_RESPONSE_PUBLIC_KEY:-}
+      DJANGO_PUBLIC_DEPLOYMENT: ${DJANGO_PUBLIC_DEPLOYMENT:-false}
       DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost 127.0.0.1}
       DJANGO_EMAIL_HOST: ${DJANGO_EMAIL_HOST:-localhost}
       DJANGO_EMAIL_PORT: ${DJANGO_EMAIL_PORT:-587}
@@ -75,23 +114,27 @@ services:
       DJANGO_EMAIL_USE_TLS: ${DJANGO_EMAIL_USE_TLS:-true}
       DJANGO_DEFAULT_FROM_EMAIL: ${DJANGO_DEFAULT_FROM_EMAIL:-webmaster@localhost}
     ports:
-      - "${API_PORT:-8000}:8000"
+      - "127.0.0.1:${API_PORT:-8000}:8000"
     volumes:
-      - api-data:/data
+      - api-runtime-data:/data
+    depends_on:
+      api-db-init:
+        condition: service_completed_successfully
     healthcheck:
       test:
         [
           "CMD",
           "python",
           "-c",
-          "from urllib.request import urlopen; urlopen('http://127.0.0.1:8000/admin/login/', timeout=3).close()",
+          "from urllib.request import urlopen; urlopen('http://127.0.0.1:8000/api/health/', timeout=3).close()",
         ]
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 60s
+      # The first startup loads the full catalog before Gunicorn listens.
+      start_period: 300s
     restart: unless-stopped
 
 volumes:
   postgres-data:
-  api-data:
+  api-runtime-data:

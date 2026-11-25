@@ -4,6 +4,6 @@ from project.settings import *
 
 DEBUG = False
 ALLOWED_HOSTS = [*ALLOWED_HOSTS, '127.0.0.1']
-DATABASES['default']['NAME'] = '/data/db.sqlite'
+FIXTURE_DIRS = [BASE_DIR / 'fixtures']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')

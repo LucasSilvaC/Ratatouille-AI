@@ -62,9 +62,14 @@ class ListFilterTests(APITestCase):
         esperada = Resposta.objects.create(pergunta=pergunta, usuario=self.user, resposta="Banana")
         Resposta.objects.create(pergunta=outra, usuario=self.user, resposta="Banana")
         Resposta.objects.create(pergunta=pergunta, usuario=outro_autor, resposta="Banana")
-        Resposta.objects.create(pergunta=pergunta, usuario=self.user, resposta="Maçã")
+        outra_resposta_propria = Resposta.objects.create(
+            pergunta=pergunta, usuario=self.user, resposta="Maçã"
+        )
 
         perguntas = self.client.get("/api/perguntas/", {"search": "fruta"})
         self.assertEqual([item["id"] for item in perguntas.data["results"]], [pergunta.pk])
-        respostas = self.client.get("/api/respostas/", {"pergunta": pergunta.pk, "search": "ban"})
-        self.assertEqual([item["id"] for item in respostas.data["results"]], [esperada.pk])
+        respostas = self.client.get("/api/respostas/", {"pergunta": pergunta.pk})
+        self.assertEqual(
+            {item["id"] for item in respostas.data["results"]},
+            {esperada.pk, outra_resposta_propria.pk},
+        )

@@ -1,5 +1,6 @@
 """Atende perguntas e limita cada resposta ao usuário que a criou."""
 
+from django.db import transaction
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import generics, permissions
 from rest_framework.filters import SearchFilter
@@ -39,9 +40,8 @@ class RespostaOwnerMixin:
 
 class RespostaListCreateView(RespostaOwnerMixin, generics.ListCreateAPIView):
     pagination_class = CatalogPagination
-    filter_backends = (DjangoFilterBackend, SearchFilter)
+    filter_backends = (DjangoFilterBackend,)
     filterset_fields = ("pergunta",)
-    search_fields = ("resposta",)
 
     def perform_create(self, serializer):
         # O autor vem da autenticação, independentemente do corpo da requisição.
@@ -49,4 +49,10 @@ class RespostaListCreateView(RespostaOwnerMixin, generics.ListCreateAPIView):
 
 
 class RespostaDetailView(RespostaOwnerMixin, generics.RetrieveUpdateDestroyAPIView):
-    pass
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        return queryset.select_for_update() if self.request.method in {"PUT", "PATCH"} else queryset
+
+    @transaction.atomic
+    def update(self, request, *args, **kwargs):
+        return super().update(request, *args, **kwargs)

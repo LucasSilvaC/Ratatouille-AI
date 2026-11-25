@@ -8,6 +8,12 @@ from django.core.validators import MinLengthValidator
 from django.db import models
 from django.db.models.functions import Length
 from django.db.models.lookups import Exact
+from django.utils import timezone
+
+from .diagnosis.sealed_responses import SealedResponse, SealedResponseField, seal_response
+
+
+UUID_PATTERN = r"^[0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}$"
 
 
 def novo_uuid():
@@ -50,8 +56,8 @@ class Nutriente(models.Model):
 
 
 class AlimentoNutriente(models.Model):
-    # A tabela legada admite mais de uma linha para o mesmo par.
-    id = models.AutoField(primary_key=True, db_column="rowid")
+    # O catálogo admite mais de uma medição para o mesmo par.
+    id = models.AutoField(primary_key=True)
     alimento = models.ForeignKey(
         Alimento, on_delete=models.PROTECT, db_column="alimento_codigo", db_index=False
     )
@@ -71,19 +77,40 @@ class AlimentoNutriente(models.Model):
 class Pergunta(models.Model):
     id = models.TextField(primary_key=True, default=novo_uuid, editable=False)
     pergunta = models.TextField()
+    opcoes = models.JSONField(default=list, blank=True)
+    aceita_texto_livre = models.BooleanField(default=False)
 
     class Meta:
         db_table = "perguntas"
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(id__regex=UUID_PATTERN), name="pergunta_uuid_valido"
+            )
+        ]
 
 
 class Resposta(models.Model):
     id = models.TextField(primary_key=True, default=novo_uuid, editable=False)
-    resposta = models.TextField()
-    usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT, db_index=False)
+    resposta = SealedResponseField()
+    usuario = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, db_index=False)
     pergunta = models.ForeignKey(Pergunta, on_delete=models.PROTECT, db_index=False)
+    criada_em = models.DateTimeField(default=timezone.now, editable=False, db_index=True)
+
+    def save(self, *args, **kwargs):
+        if not isinstance(self.resposta, SealedResponse):
+            self.resposta = seal_response(
+                self.resposta, answer_id=self.pk, owner_id=self.usuario_id,
+                question_id=self.pergunta_id,
+            )
+        return super().save(*args, **kwargs)
 
     class Meta:
         db_table = "respostas"
+        constraints = [
+            models.CheckConstraint(
+                condition=models.Q(id__regex=UUID_PATTERN), name="resposta_uuid_valido"
+            )
+        ]
         indexes = [
             models.Index(fields=["usuario"], name="idx_respostas_usuario"),
             models.Index(fields=["pergunta"], name="idx_respostas_pergunta"),

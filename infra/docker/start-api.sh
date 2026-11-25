@@ -2,11 +2,6 @@
 set -eu
 umask 077
 
-if [ ! -e /data/db.sqlite ]; then
-    cp /seed/db.sqlite /data/db.sqlite.tmp
-    mv /data/db.sqlite.tmp /data/db.sqlite
-fi
-
 if [ -z "${DJANGO_SECRET_KEY:-}" ]; then
     if [ ! -s /data/django-secret-key ]; then
         python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())' > /data/django-secret-key.tmp
@@ -16,5 +11,13 @@ if [ -z "${DJANGO_SECRET_KEY:-}" ]; then
     export DJANGO_SECRET_KEY
 fi
 
+if [ -n "${DJANGO_LEGACY_RESPONSE_ENCRYPTION_KEYS:-}" ]; then
+    echo "Execute a migração legada em um processo separado da API." >&2
+    exit 1
+fi
+
+
 python manage.py migrate --noinput
+python manage.py createcachetable
+python manage.py seed_catalog
 exec "$@"

@@ -3,15 +3,19 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import PasswordResetForm
 from django.contrib.auth.views import PasswordResetConfirmView
+from django.db import transaction
+from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 from rest_framework import generics, permissions, status, throttling
 from rest_framework.response import Response
+from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
-from ..mixins import ProtectedDeleteMixin
 from ..pagination import CatalogPagination
 from .forms import ConfirmarSenhaForm
 from .passwords import definir_senha
 from .serializers import (
+    IdentificacaoUsuarioSerializer,
     RegistroUsuarioSerializer,
     SolicitarRedefinicaoSenhaSerializer,
     TrocarSenhaSerializer,
@@ -20,30 +24,54 @@ from .serializers import (
 
 
 class CriarUsuarioAPIView(generics.CreateAPIView):
+    authentication_classes = []
     permission_classes = [permissions.AllowAny]
     serializer_class = RegistroUsuarioSerializer
+    throttle_classes = [throttling.ScopedRateThrottle]
+    throttle_scope = "register"
+
+
+class LoginAPIView(TokenObtainPairView):
+    throttle_classes = [throttling.ScopedRateThrottle]
+    throttle_scope = "login"
+
+
+class RenovarTokenAPIView(TokenRefreshView):
+    throttle_classes = [throttling.ScopedRateThrottle]
+    throttle_scope = "token_refresh"
 
 
 class UsuarioListView(generics.ListAPIView):
     permission_classes = [permissions.IsAdminUser]
-    serializer_class = UsuarioSerializer
+    serializer_class = IdentificacaoUsuarioSerializer
     pagination_class = CatalogPagination
 
     def get_queryset(self):
         return get_user_model().objects.order_by("pk")
 
 
-class UsuarioDetailView(ProtectedDeleteMixin, generics.RetrieveUpdateDestroyAPIView):
+class UsuarioDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = UsuarioSerializer
 
     def get_queryset(self):
         accounts = get_user_model().objects.all()
         user = self.request.user
-        # Staff lê outros perfis. Alterações e exclusão ficam restritas ao titular.
+        # Staff identifica outras contas. Alterações e exclusão são do titular.
         if user.is_staff and self.request.method in permissions.SAFE_METHODS:
             return accounts
         return accounts.filter(pk=user.pk)
+
+    def get_serializer_class(self):
+        if self.request.user.is_staff and self.kwargs.get("pk") != self.request.user.pk:
+            return IdentificacaoUsuarioSerializer
+        return UsuarioSerializer
+
+    @transaction.atomic
+    def perform_destroy(self, instance):
+        account = get_object_or_404(get_user_model().objects.select_for_update(), pk=instance.pk)
+        OutstandingToken.objects.filter(user=account).delete()
+        super().perform_destroy(account)
 
 
 class TrocarSenhaAPIView(generics.GenericAPIView):

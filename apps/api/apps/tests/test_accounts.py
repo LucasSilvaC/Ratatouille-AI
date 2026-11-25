@@ -4,7 +4,6 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from ..accounts.serializers import UsuarioSerializer
-from ..models import Pergunta, Resposta
 
 
 VALID_PASSWORD = "amora-47-mural-azul!"
@@ -101,17 +100,6 @@ class PerfilTests(APITestCase):
         self.assertEqual(self.owner.nome, "Alterado")
         self.assertEqual(self.owner.email, "perfil@example.test")
         self.assertFalse(self.owner.is_staff)
-
-    def test_exclusao_retorna_conflito_se_ha_respostas_do_titular(self):
-        pergunta = Pergunta.objects.create(pergunta="Pergunta")
-        resposta = Resposta.objects.create(
-            pergunta=pergunta, resposta="Resposta", usuario=self.owner
-        )
-        self.client.force_authenticate(self.owner)
-        self.assertEqual(self.client.delete(self.url).status_code, status.HTTP_409_CONFLICT)
-        resposta.delete()
-        self.assertEqual(self.client.delete(self.url).status_code, status.HTTP_204_NO_CONTENT)
-        self.assertFalse(get_user_model().objects.filter(pk=self.owner.pk).exists())
 
     def test_rejeita_medidas_incompativeis_com_o_modelo(self):
         self.client.force_authenticate(self.owner)
