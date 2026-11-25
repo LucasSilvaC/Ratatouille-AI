@@ -21,7 +21,7 @@ The Next.js config omits standalone output when Vercel sets `VERCEL=1`; Docker k
 
 ## Docker Compose
 
-The Compose file and Docker build configuration live under `infra/`. Compose builds the standalone runner and a migration image. It waits for PostgreSQL to become healthy, applies Drizzle migrations, and starts the app only after migration succeeds. See the [infrastructure guide](../infra/README.md) for the single entry point and configuration layout.
+The Compose file and Docker build configuration live under `infra/`. The web app waits for its Drizzle migrations to finish. The Django API waits for its separate PostgreSQL database and role, then runs `migrate` and `seed_catalog` before starting. See the [infrastructure guide](../infra/README.md) for the single entry point and configuration layout.
 
 ```sh
 pnpm infra:up

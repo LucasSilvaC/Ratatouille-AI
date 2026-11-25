@@ -1,5 +1,0 @@
-CREATE TABLE respostas (id TEXT PRIMARY KEY NOT NULL DEFAULT (lower(hex(randomblob(4))) || '-' || lower(hex(randomblob(2))) || '-4' || substr(lower(hex(randomblob(2))),2) || '-' || substr('89ab',abs(random() % 4)+1,1) || substr(lower(hex(randomblob(2))),2) || '-' || lower(hex(randomblob(6)))) CHECK(length(id)=36 AND substr(id,9,1)='-' AND substr(id,14,1)='-' AND substr(id,19,1)='-' AND substr(id,24,1)='-' AND length(replace(id,'-',''))=32 AND lower(replace(id,'-','')) NOT GLOB '*[^0-9a-f]*'), resposta TEXT NOT NULL, usuario_id INTEGER NOT NULL REFERENCES auth_user(id), pergunta_id TEXT NOT NULL REFERENCES perguntas(id));
-
-CREATE INDEX idx_respostas_usuario ON respostas(usuario_id);
-
-CREATE INDEX idx_respostas_pergunta ON respostas(pergunta_id);

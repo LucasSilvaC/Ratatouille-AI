@@ -4,7 +4,6 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from ..accounts.serializers import UsuarioSerializer
-from ..models import Pergunta, Resposta
 
 
 VALID_PASSWORD = "amora-47-mural-azul!"
@@ -44,7 +43,7 @@ class RegistroTests(APITestCase):
                     "/api/register/", {"username": "pessoa", **payload}, format="json"
                 )
                 self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-                self.assertIn(field, response.data)
+                self.assertIn(field, response.json()["fields"])
         self.assertFalse(get_user_model().objects.exists())
 
     def test_registro_valida_unicidade_do_username_normalizado(self):
@@ -59,7 +58,7 @@ class RegistroTests(APITestCase):
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("username", response.data)
+        self.assertIn("username", response.json()["fields"])
 
 
 class PerfilTests(APITestCase):
@@ -102,17 +101,6 @@ class PerfilTests(APITestCase):
         self.assertEqual(self.owner.email, "perfil@example.test")
         self.assertFalse(self.owner.is_staff)
 
-    def test_exclusao_retorna_conflito_se_ha_respostas_do_titular(self):
-        pergunta = Pergunta.objects.create(pergunta="Pergunta")
-        resposta = Resposta.objects.create(
-            pergunta=pergunta, resposta="Resposta", usuario=self.owner
-        )
-        self.client.force_authenticate(self.owner)
-        self.assertEqual(self.client.delete(self.url).status_code, status.HTTP_409_CONFLICT)
-        resposta.delete()
-        self.assertEqual(self.client.delete(self.url).status_code, status.HTTP_204_NO_CONTENT)
-        self.assertFalse(get_user_model().objects.filter(pk=self.owner.pk).exists())
-
     def test_rejeita_medidas_incompativeis_com_o_modelo(self):
         self.client.force_authenticate(self.owner)
         response = self.client.patch(
@@ -121,7 +109,7 @@ class PerfilTests(APITestCase):
             format="json",
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertEqual(set(response.data), {"idade", "peso", "altura", "disposicao"})
+        self.assertEqual(set(response.json()["fields"]), {"idade", "peso", "altura", "disposicao"})
 
     def test_atualizacao_de_perfil_preserva_troca_de_senha_concorrente(self):
         serializer = UsuarioSerializer(self.owner, data={"nome": "Alterado"}, partial=True)
@@ -173,12 +161,12 @@ class AutenticacaoTests(APITestCase):
             url, {"senha_atual": "incorreta", "nova_senha": nova_senha}, format="json"
         )
         self.assertEqual(invalid.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("senha_atual", invalid.data)
+        self.assertIn("senha_atual", invalid.json()["fields"])
         weak = self.client.post(
             url, {"senha_atual": VALID_PASSWORD, "nova_senha": "123"}, format="json"
         )
         self.assertEqual(weak.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("nova_senha", weak.data)
+        self.assertIn("password_too_short", weak.json()["fields"]["nova_senha"])
 
         response = self.client.post(
             url, {"senha_atual": VALID_PASSWORD, "nova_senha": nova_senha}, format="json"

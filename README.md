@@ -2,22 +2,23 @@
 
 <img src="apps/web/public/brand/ratatouille-ai.svg" alt="Logo do RatatouilleAI: silhueta de Remy com touca de chef" width="112" height="112" />
 
-Monorepo com o web-app Next.js existente e estrutura documentada para agentes LLM,
+Monorepo com o web-app Next.js, a API Django e estrutura documentada para agentes LLM,
 recomendação alimentar e rede neural em Python.
 
 ## Estrutura
 
-| Pasta                     | Responsabilidade                                          | Estado                          |
-| ------------------------- | --------------------------------------------------------- | ------------------------------- |
-| `apps/web`                | Interface e backend Next.js, Drizzle e testes             | Implementado                    |
-| `apps/ai-api`             | API Python/FastAPI                                        | Somente documentação            |
-| `apps/ai-worker`          | Execução assíncrona e jobs                                | Somente documentação            |
-| `packages/agents`         | NutriGuard, Chef Regional e integração LLM                | Somente documentação            |
-| `packages/recommendation` | Políticas, busca, ranking e validação                     | Somente documentação            |
-| `packages/neural`         | Treinamento e inferência de afinidade                     | Somente documentação            |
-| `packages/ai-client`      | Cliente TypeScript gerado da API                          | Somente documentação            |
-| `contracts`               | Contratos OpenAPI e eventos                               | Somente documentação            |
-| `infra`                   | Inicialização, Docker, Compose e configuração operacional | Implementado para o stack atual |
+| Pasta                            | Responsabilidade                                                              | Estado                          |
+| -------------------------------- | ----------------------------------------------------------------------------- | ------------------------------- |
+| `apps/web`                       | Interface e backend Next.js, Drizzle e testes                                 | Implementado                    |
+| [`apps/api`](apps/api/README.md) | API Django REST Framework para autenticação, alimentos, perguntas e respostas | Implementado                    |
+| `apps/ai-api`                    | API Python/FastAPI                                                            | Somente documentação            |
+| `apps/ai-worker`                 | Execução assíncrona e jobs                                                    | Somente documentação            |
+| `packages/agents`                | NutriGuard, Chef Regional e integração LLM                                    | Somente documentação            |
+| `packages/recommendation`        | Políticas, busca, ranking e validação                                         | Somente documentação            |
+| `packages/neural`                | Treinamento e inferência de afinidade                                         | Somente documentação            |
+| `packages/ai-client`             | Cliente TypeScript gerado da API                                              | Somente documentação            |
+| `contracts`                      | Contratos OpenAPI e eventos                                                   | Somente documentação            |
+| `infra`                          | Inicialização, Docker, Compose e configuração operacional                     | Implementado para o stack atual |
 
 Consulte [a arquitetura](docs/architecture.md), o [guia de infraestrutura](infra/README.md)
 e os README.md de cada pasta. Toda inicialização de serviços deve ser centralizada em
@@ -31,6 +32,22 @@ http://localhost:3000. A galeria fica em `/componentes`. Esse fluxo não exige b
 ou variáveis de ambiente. Os dados são mantidos em memória e reiniciam ao recarregar.
 
 ## Desenvolvimento
+
+O código da API Django fica em `apps/api/apps/`. As views estão em
+[`accounts/`](apps/api/apps/accounts/views.py), [`foods/`](apps/api/apps/foods/views.py)
+e [`diagnosis/`](apps/api/apps/diagnosis/views.py). A API usa o ORM do Django com
+uma base PostgreSQL dedicada. Siga o [README da API Django](apps/api/README.md)
+para preparar as dependências e provisionar o banco. Depois, execute pela raiz:
+
+```powershell
+node infra/scripts/with-env.mjs apps/api/env/Scripts/python.exe apps/api/manage.py migrate
+node infra/scripts/with-env.mjs apps/api/env/Scripts/python.exe apps/api/manage.py seed_catalog
+node infra/scripts/with-env.mjs apps/api/env/Scripts/python.exe apps/api/manage.py runserver
+```
+
+`migrate` cria as tabelas no PostgreSQL e aplica as migrações pendentes. `seed_catalog`
+carrega o catálogo inicial quando suas tabelas estão vazias. Veja a
+[referência do banco Django](infra/database/README.md).
 
 Requisitos: Node 24, pnpm 11 e Docker Compose. Para subir todo o stack implementado em um comando, execute pela raiz:
 
@@ -81,8 +98,9 @@ e `apps/web/drizzle`, respectivamente.
 
 ## Deploy
 
-`pnpm infra:up` aplica migrações e inicia o web-app. A imagem final usa o servidor
-standalone em `apps/web/server.js`. Os serviços Python ainda não fazem parte do Compose.
+`pnpm infra:up` provisiona os bancos PostgreSQL, aplica as migrações, carrega o
+catálogo inicial e inicia o web-app e a API Django. A imagem do web-app
+usa o servidor standalone em `apps/web/server.js`.
 Consulte o [guia de infraestrutura](infra/README.md) e [deploy e CI/CD](docs/deployment.md).
 
 Na Vercel, configure Root Directory como `apps/web` e permita arquivos externos ao

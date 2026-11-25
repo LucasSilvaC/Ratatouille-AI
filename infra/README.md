@@ -15,22 +15,24 @@ comando `pnpm infra:up` instala as dependências dentro das imagens; não exige
 pnpm infra:up
 ```
 
-`pnpm infra:up` constrói e inicia o web-app e a API Django. O web-app aguarda as
-migrações no PostgreSQL. A API aplica as migrações no próprio SQLite antes de
-iniciar o Gunicorn. Os padrões funcionam sem arquivo de ambiente.
+`pnpm infra:up` constrói e inicia o web-app e a API Django. Cada aplicação usa
+sua própria base no PostgreSQL. O web-app aguarda as migrações do Drizzle.
+A API executa `migrate` e `seed_catalog` antes de iniciar o Gunicorn.
+Os padrões funcionam sem arquivo de ambiente.
 Para ajustar portas e credenciais, copie `infra/.env.example` para `infra/.env` antes
 de iniciar. O arquivo `.env` é local e ignorado pelo Git.
 
 Comandos disponíveis pela raiz:
 
-| Comando                   | Ação                                                     |
-| ------------------------- | -------------------------------------------------------- |
-| `pnpm infra:up`           | Sobe o stack implementado e constrói as imagens.         |
-| `pnpm infra:db`           | Sobe somente o PostgreSQL para desenvolvimento local.    |
-| `pnpm infra:ps`           | Mostra o estado dos serviços.                            |
-| `pnpm infra:logs`         | Acompanha os logs do Compose.                            |
-| `pnpm infra:down`         | Para os serviços e mantém os dados do volume.            |
-| `pnpm infra:down:volumes` | Para os serviços e apaga os dados persistidos do volume. |
+| Comando                     | Ação                                                     |
+| --------------------------- | -------------------------------------------------------- |
+| `pnpm infra:up`             | Sobe o stack implementado e constrói as imagens.         |
+| `pnpm infra:db`             | Sobe somente o PostgreSQL para desenvolvimento local.    |
+| `pnpm infra:db api-db-init` | Sobe o PostgreSQL e provisiona a base local da API.      |
+| `pnpm infra:ps`             | Mostra o estado dos serviços.                            |
+| `pnpm infra:logs`           | Acompanha os logs do Compose.                            |
+| `pnpm infra:down`           | Para os serviços e mantém os dados do volume.            |
+| `pnpm infra:down:volumes`   | Para os serviços e apaga os dados persistidos do volume. |
 
 Para desenvolver o app na máquina, use `pnpm infra:db`, `pnpm db:migrate` e
 `pnpm dev`. Os comandos locais carregam o mesmo `infra/.env`; sem esse arquivo,
@@ -49,37 +51,106 @@ pnpm infra:up api
 ```
 
 A API atende na porta `API_PORT` (8000 por padrão) e oferece o Swagger em
-`http://localhost:8000/api/swagger/`. Na primeira inicialização, o container
-copia o catálogo versionado para o volume `api-data`. Ao recriar o container,
-ele reaproveita o SQLite desse volume e aplica as migrações pendentes. Faça backup
-do volume antes de atualizar a API com migrações.
+`http://localhost:8000/api/swagger/`. O serviço `api-db-init` cria a base e a
+credencial da API quando necessário. Os dados ficam no volume PostgreSQL
+`postgres-data`. O seed carrega o catálogo quando suas tabelas estão vazias.
+A primeira carga pode levar alguns minutos. A API inicia após a conclusão.
+Faça backup da base antes de atualizar a API com migrações.
 
-Para deploy público, configure `DJANGO_ALLOWED_HOSTS` com o domínio da API em
-`infra/.env` e publique o serviço atrás de um proxy HTTPS. Defina uma
-`DJANGO_SECRET_KEY` estável ou mantenha a chave gerada no volume `api-data`.
-Use as variáveis SMTP do mesmo arquivo para habilitar o envio real de e-mails.
+A API lê a configuração `DJANGO_DB_NAME`, `DJANGO_DB_USER`,
+`DJANGO_DB_PASSWORD`, `DJANGO_DB_HOST` e `DJANGO_DB_PORT`. No Compose, a conexão
+usa o host interno `postgres` e a porta 5432. No Django local, o host padrão é
+`127.0.0.1` e a porta acompanha `POSTGRES_PORT` quando `DJANGO_DB_PORT` está
+ausente.
+
+Após o provisionamento, uma rotação de `DJANGO_DB_PASSWORD` exige atualizar a
+senha da credencial no PostgreSQL e a configuração da API.
+
+### Publicar por HTTPS
+
+Antes de abrir o piloto, defina em `infra/.env`:
+
+- `DJANGO_PUBLIC_DEPLOYMENT=true` e os domínios exatos da API em
+  `DJANGO_ALLOWED_HOSTS`, separados por espaços.
+- Uma `DJANGO_SECRET_KEY` forte, gerada aleatoriamente, com pelo menos 50
+  caracteres e armazenada de forma persistente. A geração automática no
+  volume da API é reservada ao modo local.
+- Senhas aleatórias e distintas em `POSTGRES_PASSWORD` e
+  `DJANGO_DB_PASSWORD`. Para um volume existente, rotacione as credenciais
+  efetivas no PostgreSQL antes de alterar a configuração do Compose.
+- A configuração KMS das respostas descrita no [guia do banco](database/README.md)
+  e as variáveis SMTP com TLS para entrega dos links de recuperação.
+
+Execute um proxy HTTPS no mesmo host. O Compose publica as portas da API e
+do PostgreSQL apenas em `127.0.0.1`. O modo público desabilita o Django Admin,
+ativa redirecionamento para HTTPS, HSTS e cookies seguros. O health check
+interno usa `/api/health/`.
+O HSTS cobre o host da API. Subdomínios e preload dependem da política
+HTTPS de todo o domínio usado no deploy.
+
+O Django confia em um único proxy. O proxy deve sobrescrever
+`X-Forwarded-Proto` e `X-Forwarded-For` com o protocolo e IP da conexão
+recebida, sem confiar em valores enviados pelo cliente. Exemplo de configuração
+para Caddy no host, com um domínio que aponta para o servidor:
+
+```caddyfile
+{
+    log {
+        exclude http.log.error
+    }
+}
+
+api.example.com {
+    log {
+        format filter {
+            wrap json
+            request>uri delete
+            request>headers delete
+            request>remote_ip delete
+            request>remote_port delete
+            request>client_ip delete
+            resp_headers delete
+        }
+    }
+    log_append request_id {http.response.header.X-Request-ID}
+
+    reverse_proxy 127.0.0.1:8000 {
+        header_up X-Forwarded-Proto {scheme}
+        header_up X-Forwarded-For {remote_host}
+        header_up -X-Forwarded-Protocol
+        header_up -X-Forwarded-Ssl
+    }
+}
+```
+
+O exemplo correlaciona os logs pelo `X-Request-ID` que o Django gera na
+resposta. O filtro omite URLs completas, cabeçalhos e IPs dos logs de acesso.
+O status do proxy permanece disponível para investigar falhas.
+Restrinja o acesso aos logs, configure uma retenção curta no coletor e aplique
+a mesma política em qualquer camada à frente do proxy. Consulte a
+[configuração de log do Caddy](https://caddyserver.com/docs/caddyfile/directives/log).
+
+Os limites por IP são de 10 logins, 5 cadastros e 30 renovações de token por
+minuto. O modo público compartilha os contadores entre workers via PostgreSQL.
+O Compose cria a tabela de cache no início. Em uma instalação direta, execute
+`manage.py createcachetable` após `migrate` antes de iniciar o servidor.
+
+Valide em homologação, com uma conta e uma caixa postal de teste:
+
+1. Confirme que apenas o proxy consegue servir a API pela rede externa e
+   que o HTTP público redireciona para HTTPS.
+2. Solicite e abra um link de recuperação. Confirme que ele usa o domínio e
+   o protocolo esperados e conclua a troca de senha.
+3. Compare o `X-Request-ID` de uma resposta com os registros do proxy e do
+   Django. Inspecione também os registros do provedor de hospedagem para
+   verificar a ausência dos links de recuperação, credenciais e conteúdo
+   do perfil.
 
 ## Django local
 
-Para verificar o projeto Django em `apps/api`, execute pela raiz com Python 3.14
-e o ambiente virtual local `apps/api/env`:
-
-```powershell
-python -m venv apps/api/env
-apps/api/env/Scripts/python.exe -m pip install -r apps/api/requirements.txt
-apps/api/env/Scripts/python.exe apps/api/manage.py check
-if (-not (Test-Path -LiteralPath apps/api/db.sqlite)) {
-    Copy-Item -LiteralPath infra/database/db.sqlite -Destination apps/api/db.sqlite
-}
-apps/api/env/Scripts/python.exe apps/api/manage.py migrate
-apps/api/env/Scripts/python.exe apps/api/manage.py runserver
-```
-
-O servidor local oferece o admin em `http://127.0.0.1:8000/admin/` e usa
-`apps/api/db.sqlite`. Copie a base versionada antes da primeira migração para
-incluir o catálogo alimentar. A migração inicial reconhece as tabelas existentes
-e registra o schema no Django. Em um SQLite vazio, ela cria apenas as tabelas.
-A migração inicial é irreversível para proteger os dados adotados.
+Use o [guia da API](../apps/api/README.md) para provisionar a base PostgreSQL,
+instalar as dependências e executar `migrate`, `seed_catalog` e `runserver`.
+O [README do banco](database/README.md) descreve o esquema e o fixture.
 Para manter as sessões entre reinicializações, exporte `DJANGO_SECRET_KEY` no
 processo ou execute o servidor com o carregador de `infra/.env`.
 
