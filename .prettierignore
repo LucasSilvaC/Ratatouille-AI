@@ -5,3 +5,6 @@
 **/test-results
 pnpm-lock.yaml
 apps/web/drizzle
+apps/api/env
+apps/api/apps/templates
+infra/database/seed.json

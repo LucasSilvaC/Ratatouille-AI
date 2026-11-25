@@ -57,6 +57,9 @@ export function AppShell({
                 </Link>
               </>
             )}
+            <Link href="/produtos" className="nav-link">
+              Buscar produtos
+            </Link>
             <span className="demo-badge">
               <Leaf size={14} /> Demonstração local
             </span>

@@ -5,13 +5,35 @@ from collections.abc import Mapping
 from django.contrib.auth import get_user_model, password_validation
 from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework import serializers
+from rest_framework.exceptions import ErrorDetail
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
 
 def validar_senha(password, user, field):
     try:
         password_validation.validate_password(password, user)
     except DjangoValidationError as error:
-        raise serializers.ValidationError({field: error.messages}) from error
+        details = [
+            ErrorDetail("Senha inválida.", code=violation.code or "invalid")
+            for violation in error.error_list
+        ]
+        raise serializers.ValidationError({field: details}) from error
+
+
+class LoginTokenSerializer(TokenObtainPairSerializer):
+    def validate(self, attrs):
+        tokens = super().validate(attrs)
+        request = self.context.get("request")
+        if request is not None:
+            # A auditoria usa a conta autenticada sem ler a senha ou o JWT.
+            request.user = self.user
+        return tokens
+
+
+class IdentificacaoUsuarioSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = get_user_model()
+        fields = ("id", "username")
 
 
 class UsuarioSerializer(serializers.ModelSerializer):

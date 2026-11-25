@@ -11,7 +11,9 @@ class QuestionnaireApiTests(APITestCase):
         users = get_user_model().objects
         self.user = users.create_user(username="participante")
         self.staff = users.create_user(username="equipe", is_staff=True)
-        self.question = Pergunta.objects.create(pergunta="Qual é a sua fruta favorita?")
+        self.question = Pergunta.objects.create(
+            pergunta="Qual é a sua fruta favorita?", opcoes=["Banana", "Manga"]
+        )
 
     def test_only_authenticated_users_can_read_questions(self):
         url = reverse("api:pergunta-list")
@@ -25,12 +27,16 @@ class QuestionnaireApiTests(APITestCase):
         self.assertEqual(response.data["results"], [{
             "id": self.question.pk,
             "pergunta": "Qual é a sua fruta favorita?",
+            "opcoes": ["Banana", "Manga"],
+            "aceita_texto_livre": False,
         }])
 
     def test_staff_can_manage_questions(self):
         collection = reverse("api:pergunta-list")
         self.client.force_authenticate(self.user)
-        payload = {"pergunta": "Você tem restrições alimentares?"}
+        payload = {
+            "pergunta": "Você tem restrições alimentares?", "opcoes": ["Sim", "Não"]
+        }
         self.assertEqual(
             self.client.post(collection, payload).status_code,
             status.HTTP_403_FORBIDDEN,
@@ -63,7 +69,8 @@ class QuestionnaireApiTests(APITestCase):
         )
         self.assertEqual(self.client.delete(detail).status_code, status.HTTP_404_NOT_FOUND)
         self.client.force_authenticate(self.user)
-        self.assertEqual(self.client.get(detail).data["resposta"], "Banana")
+        self.assertEqual(self.client.get(detail).status_code, status.HTTP_200_OK)
+        self.assertNotIn("resposta", self.client.get(detail).data)
 
     def test_cannot_submit_answer_to_nonexistent_question(self):
         collection = reverse("api:resposta-list")
@@ -75,7 +82,7 @@ class QuestionnaireApiTests(APITestCase):
         })
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("pergunta", response.data)
+        self.assertIn("pergunta", response.json()["fields"])
         self.assertEqual(self.client.get(collection).data["results"], [])
 
     def test_staff_cannot_delete_question_with_answers(self):
@@ -105,7 +112,7 @@ class QuestionnaireApiTests(APITestCase):
         self.assertEqual(self.client.get(collection).data["results"], [created.data])
         updated = self.client.patch(detail, {"resposta": "Manga", "usuario": self.staff.pk})
         self.assertEqual(updated.status_code, status.HTTP_200_OK)
-        self.assertEqual(updated.data["resposta"], "Manga")
+        self.assertNotIn("resposta", updated.data)
         self.assertEqual(updated.data["usuario"], self.user.pk)
         self.assertEqual(self.client.delete(detail).status_code, status.HTTP_204_NO_CONTENT)
         self.assertEqual(self.client.get(detail).status_code, status.HTTP_404_NOT_FOUND)

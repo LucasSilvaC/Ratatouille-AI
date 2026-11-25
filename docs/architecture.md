@@ -2,13 +2,14 @@
 
 ## Estado atual e destino
 
-O monorepo contém um web-app Next.js funcional em `apps/web`. API Python, worker,
-agentes, recomendação e rede neural são somente pastas documentadas. Não existem
-integrações de IA, endpoints Python, modelo treinado, broker ou pgvector ativos.
+O monorepo contém o web-app Next.js em `apps/web` e a API Django em `apps/api`.
+A API atende contas, catálogo alimentar e questionários no PostgreSQL. A API
+de IA, o worker, os agentes, a recomendação e a rede neural estão planejados.
 
 ```text
 apps/
   web/          Next.js, interface e backend do produto
+  api/          Django REST Framework, contas, catálogo e questionários
   ai-api/       Futuro FastAPI
   ai-worker/    Futuros jobs assíncronos
 packages/
@@ -32,10 +33,18 @@ serviços existentes e evitando cópias de configuração em `apps/`. Consulte o
 
 ## Comunicação e dependências
 
+Em `apps/api/apps/diagnosis/`, o Django valida e cifra as respostas antes de
+gravá-las no banco da API. Os endpoints retornam metadados. O leitor interno
+desse módulo poderá ser chamado pelo worker com uma identidade própria no KMS
+e o escopo de uma tarefa autorizada. O formato cifrado e as instruções de
+migração estão descritos no [guia do banco](../infra/database/README.md).
+
 ```mermaid
 flowchart TD
     Browser[Navegador] --> Web[Next.js]
     Web --> ProductDB[(Dados do produto)]
+    Client[Cliente da API] --> Django[API Django]
+    Django --> DjangoDB[(Banco da API Django)]
     Web -. HTTP autenticado .-> API[Futura API Python]
     API -. importa .-> Agents[agents]
     API -. importa .-> Recommendation[recommendation]

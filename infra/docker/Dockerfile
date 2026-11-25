@@ -10,7 +10,7 @@ COPY apps/api/apps ./apps
 COPY apps/api/project ./project
 COPY infra/docker/django_settings.py ./docker_settings.py
 COPY infra/docker/start-api.sh /usr/local/bin/start-api
-COPY infra/database/db.sqlite /seed/db.sqlite
+COPY infra/database/seed.json ./fixtures/seed.json
 RUN useradd --create-home --uid 1001 django \
     && install -d -o django /data \
     && python manage.py collectstatic --noinput
