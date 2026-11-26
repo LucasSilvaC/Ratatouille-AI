@@ -1,0 +1,179 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ratatouille-recommendation/entrada_planejador.schema.json",
+  "title": "Entrada do planejador (Montador + Avaliador)",
+  "description": "O que o roteador/chatbot entrega ao planejador para montar o cardápio do dia. OBRIGATÓRIO: só dados_dri. Regras alimentares: restricoes + nao_misturar (+ nao_gosta). Nomes fora das listas são recusados (EntradaInvalida): o roteador traduz o que a pessoa escreveu (ex.: 'sigo kosher') para nomes destas listas; o planejador não interpreta texto livre, exceto em nao_gosta e avisos. Exemplos, em ordem: mínimo; pessoa que segue kosher; pessoa que come halal; vegetariana com alergia a amendoim que não gosta de jiló.",
+  "type": "object",
+  "required": ["dados_dri"],
+  "additionalProperties": false,
+  "properties": {
+    "nome": {
+      "type": "string",
+      "description": "Nome da pessoa (opcional)."
+    },
+    "dados_dri": {
+      "type": "object",
+      "description": "Dados para a calculadora de metas (energia, proteína, fibra, sódio).",
+      "required": ["sexo", "idade", "altura_cm", "peso_kg", "atividade"],
+      "additionalProperties": false,
+      "properties": {
+        "sexo": {
+          "enum": ["F", "M"]
+        },
+        "idade": {
+          "type": "integer",
+          "minimum": 19,
+          "maximum": 120,
+          "description": "Anos. Menores de 19 anos são recusados (encaminhar a nutricionista ou pediatra)."
+        },
+        "altura_cm": {
+          "type": "number",
+          "minimum": 100,
+          "maximum": 250
+        },
+        "peso_kg": {
+          "type": "number",
+          "minimum": 30,
+          "maximum": 300
+        },
+        "atividade": {
+          "enum": ["inativo", "pouco_ativo", "ativo", "muito_ativo"]
+        },
+        "metodo": {
+          "enum": ["eer2023", "anjos"],
+          "default": "eer2023",
+          "description": "eer2023 = DRI (americanos e canadenses); anjos = equação para adultos brasileiros."
+        },
+        "gestante": {
+          "type": "boolean",
+          "default": false,
+          "description": "true: recusado (encaminhar ao pré-natal)."
+        },
+        "amamentando": {
+          "type": "boolean",
+          "default": false,
+          "description": "true: recusado (encaminhar a nutricionista)."
+        }
+      }
+    },
+    "regiao": {
+      "enum": ["Brasil", "Norte", "Nordeste", "Centro-Oeste", "Sudeste", "Sul"],
+      "default": "Brasil",
+      "description": "Define quais alimentos aparecem (os mais comidos na região, pela POF)."
+    },
+    "restricoes": {
+      "type": "array",
+      "uniqueItems": true,
+      "default": [],
+      "description": "Cada nome tira um tipo de alimento antes de montar o prato. vegetariano: sem carnes nem peixes; vegano: sem nenhum produto de origem animal; pescetariano: sem carnes e aves; peixe pode; sem_lactose: sem leite e derivados; alergia_ovo: sem ovo; celiaco: sem glúten (trigo, aveia, cevada, centeio); alergia_amendoim: sem amendoim; alergia_castanhas: sem castanhas e nozes; alergia_soja: sem soja; alergia_peixe: sem peixe; alergia_crustaceos: sem crustáceos; sem_carne_vermelha: sem boi, porco, carneiro, cabrito e embutidos; sem_carne_bovina: sem carne de boi; sem_porco: sem porco e derivados (bacon, presunto, mortadela, linguiça...); sem_frutos_do_mar: sem crustáceos e moluscos; sem_peixe_sem_escama: sem cação, bagre, enguia, pintado...; sem_sangue: sem preparações com sangue (molho pardo, chouriço, sarapatel); sem_alcool: sem preparações com bebida alcoólica (vinagre pode).",
+      "items": {
+        "enum": [
+          "vegetariano",
+          "vegano",
+          "pescetariano",
+          "sem_lactose",
+          "alergia_ovo",
+          "celiaco",
+          "alergia_amendoim",
+          "alergia_castanhas",
+          "alergia_soja",
+          "alergia_peixe",
+          "alergia_crustaceos",
+          "sem_carne_vermelha",
+          "sem_carne_bovina",
+          "sem_porco",
+          "sem_frutos_do_mar",
+          "sem_peixe_sem_escama",
+          "sem_sangue",
+          "sem_alcool"
+        ]
+      }
+    },
+    "nao_misturar": {
+      "type": "array",
+      "uniqueItems": true,
+      "default": [],
+      "description": "Pares de tipos que não podem estar no mesmo prato (nem juntos num prato pronto). Tipos: carne (boi, porco, carneiro, embutidos), ave, peixe, frutos_do_mar, laticinio.",
+      "items": {
+        "type": "array",
+        "minItems": 2,
+        "maxItems": 2,
+        "uniqueItems": true,
+        "items": {
+          "enum": ["carne", "ave", "peixe", "frutos_do_mar", "laticinio"]
+        }
+      }
+    },
+    "nao_gosta": {
+      "type": "array",
+      "default": [],
+      "items": {
+        "type": "string",
+        "minLength": 2
+      },
+      "description": "Alimentos que a pessoa recusa, em palavras do nome (ex.: 'jiló', 'fígado'). Compara palavra inteira."
+    },
+    "avisos": {
+      "type": "array",
+      "default": [],
+      "items": {
+        "type": "string"
+      },
+      "description": "O que o roteador entendeu mas não vira regra verificável pelos dados (abate, certificação, contaminação cruzada, intervalo entre refeições). O app mostra; o Montador não usa."
+    }
+  },
+  "examples": [
+    {
+      "dados_dri": {
+        "sexo": "F",
+        "idade": 30,
+        "altura_cm": 163,
+        "peso_kg": 62,
+        "atividade": "pouco_ativo"
+      }
+    },
+    {
+      "dados_dri": {
+        "sexo": "M",
+        "idade": 42,
+        "altura_cm": 178,
+        "peso_kg": 80,
+        "atividade": "ativo",
+        "metodo": "anjos"
+      },
+      "regiao": "Sudeste",
+      "restricoes": ["sem_porco", "sem_frutos_do_mar", "sem_peixe_sem_escama", "sem_sangue"],
+      "nao_misturar": [
+        ["carne", "laticinio"],
+        ["ave", "laticinio"]
+      ],
+      "avisos": [
+        "abate kosher e certificação não verificáveis",
+        "intervalo entre carne e leite não verificado"
+      ]
+    },
+    {
+      "dados_dri": {
+        "sexo": "F",
+        "idade": 27,
+        "altura_cm": 160,
+        "peso_kg": 58,
+        "atividade": "pouco_ativo"
+      },
+      "regiao": "Nordeste",
+      "restricoes": ["sem_porco", "sem_sangue", "sem_alcool"],
+      "avisos": ["abate halal não verificável"]
+    },
+    {
+      "dados_dri": {
+        "sexo": "F",
+        "idade": 35,
+        "altura_cm": 168,
+        "peso_kg": 70,
+        "atividade": "ativo"
+      },
+      "restricoes": ["vegetariano", "alergia_amendoim"],
+      "nao_gosta": ["jiló"]
+    }
+  ]
+}

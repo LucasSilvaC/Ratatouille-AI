@@ -4,7 +4,7 @@
 
 - Monorepo pnpm para um app de planejamento alimentar.
 - `apps/web` é o produto implementado: Next.js, TypeScript, interface e backend. A demo usa dados locais; ainda não há integração real de IA nem validação clínica.
-- `apps/ai-api`, `apps/ai-worker`, `packages/agents`, `packages/recommendation`, `packages/neural` e `packages/ai-client` descrevem capacidades futuras. Confira o código antes de tratá-las como implementadas.
+- `apps/ai-api`, `apps/ai-worker`, `packages/agents`, `packages/recommendation`, `packages/neural` e `packages/ai-client` descrevem capacidades futuras. A exceção é a Nutripédia (RAG) em `packages/agents`, já implementada e testada com pytest; confira o código antes de tratar o resto como implementado.
 - Leia o README mais próximo da tarefa. Use [`docs/architecture.md`](docs/architecture.md) para decisões entre domínios e [`infra/README.md`](infra/README.md) para inicialização.
 
 ## Princípios

@@ -2,9 +2,7 @@
 
 ## Estado atual e destino
 
-O monorepo contém o web-app Next.js em `apps/web` e a API Django em `apps/api`.
-A API atende contas, catálogo alimentar e questionários no PostgreSQL. A API
-de IA, o worker, os agentes, a recomendação e a rede neural estão planejados.
+O monorepo contém o web-app Next.js funcional em `apps/web` e a API Django REST em `apps/api`, que atende contas, catálogo e questionários. `packages/agents` inclui a Nutripédia RAG para uso por linha de comando, e `packages/recommendation` contém módulos iniciais de restrições, planejamento e avaliação. Esses módulos Python ainda não estão integrados ao web-app. A API FastAPI, o worker, a rede neural e a integração de IA ao produto permanecem planejados; não há validação clínica.
 
 ```text
 apps/
