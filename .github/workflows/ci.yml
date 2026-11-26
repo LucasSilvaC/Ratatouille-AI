@@ -34,3 +34,18 @@ jobs:
       - run: pnpm check
       - run: pnpm --filter @ratatouille/web exec playwright install --with-deps chromium
       - run: pnpm test:e2e
+
+  agents:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: packages/agents
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.11"
+      # Só o extra dev: os testes unitários não precisam do PyTorch nem da rede.
+      - run: python -m pip install -e ".[dev]"
+      - run: python -m pytest
