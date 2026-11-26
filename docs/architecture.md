@@ -2,11 +2,7 @@
 
 ## Estado atual e destino
 
-O monorepo contém um web-app Next.js funcional em `apps/web`. Em `packages/agents`
-existe a Nutripédia, um RAG sobre a bibliografia de nutrição usado por linha de comando.
-API Python, worker, os agentes em si, recomendação e rede neural são somente pastas
-documentadas. Não existem endpoints Python, integração da IA com o web-app, modelo
-treinado, broker ou pgvector ativos.
+O monorepo contém o web-app Next.js funcional em `apps/web` e a API Django REST em `apps/api`, que atende contas, catálogo e questionários. `packages/agents` inclui a Nutripédia RAG para uso por linha de comando, e `packages/recommendation` contém módulos iniciais de restrições, planejamento e avaliação. Esses módulos Python ainda não estão integrados ao web-app. A API FastAPI, o worker, a rede neural e a integração de IA ao produto permanecem planejados; não há validação clínica.
 
 ```text
 apps/

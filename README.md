@@ -2,8 +2,8 @@
 
 <img src="apps/web/public/brand/ratatouille-ai.svg" alt="Logo do RatatouilleAI: silhueta de Remy com touca de chef" width="112" height="112" />
 
-Monorepo com o web-app Next.js, a API Django e estrutura documentada para agentes LLM,
-recomendação alimentar e rede neural em Python.
+Monorepo com web-app Next.js, API Django, Nutripédia RAG para linha de comando e
+módulos iniciais de recomendação alimentar, além de estruturas para capacidades futuras de IA.
 
 ## Estrutura
 
@@ -13,8 +13,8 @@ recomendação alimentar e rede neural em Python.
 | [`apps/api`](apps/api/README.md) | API Django REST Framework para autenticação, alimentos, perguntas e respostas | Implementado                    |
 | `apps/ai-api`                    | API Python/FastAPI                                                            | Somente documentação            |
 | `apps/ai-worker`                 | Execução assíncrona e jobs                                                    | Somente documentação            |
-| `packages/agents`                | NutriGuard, Chef Regional e integração LLM                                    | Somente documentação            |
-| `packages/recommendation`        | Políticas, busca, ranking e validação                                         | Somente documentação            |
+| `packages/agents`                | Nutripédia RAG para CLI; demais agentes ainda planejados                         | Parcial                          |
+| `packages/recommendation`        | Módulos Python de restrições, planejamento e avaliação de planos                 | Inicial, sem integração ao app   |
 | `packages/neural`                | Treinamento e inferência de afinidade                                         | Somente documentação            |
 | `packages/ai-client`             | Cliente TypeScript gerado da API                                              | Somente documentação            |
 | `contracts`                      | Contratos OpenAPI e eventos                                                   | Somente documentação            |
